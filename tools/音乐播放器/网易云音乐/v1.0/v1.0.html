@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音乐播放器</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="logo">Sharon的音乐播放器</div>
+        <nav>
+            <ul>
+                <li><a href="#">网易云音乐</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section id="music">
+            <h1>音乐播放器</h1>
+            <div class="music-player">
+                <input type="text" id="search-input" placeholder="搜索歌曲...">
+                <button id="search-button">搜索</button>
+            </div>
+            <div id="player" style="display:none;">
+                <img id="song-img" src="" alt="歌曲封面">
+                <div>
+                    <h2 id="song-title">歌曲名</h2>
+                    <h3 id="song-artist">歌手</h3>
+                </div>
+                <audio id="audio" controls></audio>
+            </div>
+            <div id="lyrics-container">
+                <div id="lyrics"></div>
+            </div>
+            <div id="search-results" class="project-boxes"></div>
+        </section>
+    </main>
+    <script src="scripts.js"></script>
+</body>
+</html>

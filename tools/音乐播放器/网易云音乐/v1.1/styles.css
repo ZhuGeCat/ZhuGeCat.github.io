@@ -1,0 +1,172 @@
+:root {
+    --primary-color: #2196F3;
+    --secondary-color: #C0E0F1;
+    --background-color: #F0F2F5;
+    --white-color: #FFFFFF;
+    --text-color: #333;
+    --shadow-color: #B8C3D3;
+}
+
+@font-face {
+    font-family: "ZCOOLKuaile";
+    src: url("../../../../fonts/站酷仓耳渔阳体 W05.TTF") format("truetype");
+}
+
+@font-face {
+    font-family: "YSHAOSHENTI";
+    src: url("../../../../fonts/优设好身体.TTF") format("truetype");
+}
+
+body {
+    font-family: 'YSHAOSHENTI', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: var(--white-color);
+    color: var(--text-color);
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    border-radius: 8px;
+}
+
+.logo {
+    font-size: 1.5rem;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+}
+
+nav ul li {
+    margin: 0 1rem;
+}
+
+nav ul li a {
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+nav ul li a:hover {
+    text-decoration: underline;
+}
+
+main {
+    padding: 2rem;
+}
+
+.music-player {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+#search-input {
+    font-family: 'YSHAOSHENTI', sans-serif;
+    padding: 0.5rem;
+    border: 1px solid var(--primary-color);
+    border-radius: 4px;
+    background-color: var(--white-color);
+    width: 100%; /* 设置宽度，可以用百分比或具体像素值，例如200px */
+}
+
+#search-button {
+    font-family: 'YSHAOSHENTI', sans-serif;
+    padding: 0.5rem 1rem;
+    background-color: var(--secondary-color);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#search-button:hover {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+}
+
+.project-box {
+    background-color: var(--white-color);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+}
+
+.project-box:hover {
+    transform: translateY(-5px);
+}
+
+#player {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: var(--white-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+#player img {
+    width: 100px;
+    border-radius: 8px;
+}
+
+#player div {
+    flex-grow: 1;
+    text-align: center; /* 居中文本 */
+}
+
+audio {
+    width: 100%;
+}
+
+#lyrics-container {
+    max-height: 200px;
+    overflow-y: scroll;
+    background-color: var(--white-color);
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    margin-top: 1rem;
+}
+
+.current-lyric {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+#toggle-container {
+    margin-top: 1rem;
+}
+
+#toggle-mode {
+    padding: 0.5rem 1rem;
+    background-color: var(--secondary-color);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#toggle-mode:hover {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+}

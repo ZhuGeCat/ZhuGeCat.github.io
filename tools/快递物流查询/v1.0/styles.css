@@ -1,0 +1,134 @@
+@font-face {
+    font-family: "ZCOOLKuaile";
+    src: url("../../../fonts/站酷仓耳渔阳体 W05.TTF") format("truetype");
+}
+
+@font-face {
+    font-family: "YSHAOSHENTI";
+    src: url("../../../fonts/优设好身体.TTF") format("truetype");
+}
+
+:root {
+    --primary-color: #2196F3;
+    --secondary-color: #C0E0F1;
+    --background-color: #F0F2F5;
+    --white-color: #FFFFFF;
+    --text-color: #333;
+    --shadow-color: #B8C3D3;
+}
+
+body {
+    font-family: 'YSHAOSHENTI', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: var(--white-color);
+    color: var(--text-color);
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    border-radius: 8px;
+}
+
+.logo {
+    font-size: 1.5rem;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+}
+
+nav ul li {
+    margin: 0 1rem;
+}
+
+nav ul li a {
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+nav ul li a:hover {
+    text-decoration: underline;
+}
+
+main {
+    padding: 2rem;
+}
+
+.express-query {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+#tracking-number {
+    padding: 0.5rem;
+    border: 1px solid var(--primary-color);
+    border-radius: 4px;
+    background-color: var(--white-color);
+}
+
+#query-button {
+    padding: 0.5rem 1rem;
+    background-color: var(--secondary-color);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#query-button:hover {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+}
+
+#tracking-results {
+    width: 100%;
+    margin-top: 2rem;
+}
+
+.project-box {
+    background-color: var(--white-color);
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    margin-bottom: 1rem;
+}
+
+.project-box h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.project-box p {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: #666;
+}
+
+footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: var(--white-color);
+    color: var(--text-color);
+    box-shadow: 0 -2px 4px var(--shadow-color);
+}
+
+input{
+    font-family: 'YSHAOSHENTI', sans-serif;
+    width: 100%;
+}
+
+button{
+    font-family: 'YSHAOSHENTI', sans-serif;
+}

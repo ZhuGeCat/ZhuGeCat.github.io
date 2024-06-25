@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一周天气查询</title>
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --secondary-color: #C0E0F1;
+            --background-color: #F0F2F5;
+            --white-color: #FFFFFF;
+            --text-color: #333;
+            --shadow-color: #B8C3D3;
+        }
+
+        @font-face {
+            font-family: "ZCOOLKuaile";
+            src: url("../../../fonts/站酷仓耳渔阳体 W05.TTF") format("truetype");
+        }
+
+        @font-face {
+            font-family: "YSHAOSHENTI";
+            src: url("../../../fonts/优设好身体.TTF") format("truetype");
+        }
+
+        body {
+            font-family: 'YSHAOSHENTI', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: var(--white-color);
+            color: var(--text-color);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            border-radius: 8px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+
+        nav ul li {
+            margin: 0 1rem;
+        }
+
+        nav ul li a {
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            padding: 2rem;
+        }
+
+        section {
+            background-color: var(--white-color);
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        .weather-form {
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: var(--white-color);
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        .weather-form input[type="radio"] {
+            margin: 10px;
+        }
+
+        .weather-form input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid var(--primary-color);
+            border-radius: 4px;
+        }
+
+        .weather-form button {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-family: 'YSHAOSHENTI', sans-serif;
+        }
+
+        .weather-form button:hover {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+        }
+
+        .weather-result {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .project-box {
+            background-color: var(--white-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            padding: 1rem;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .project-box:hover {
+            background-color: var(--secondary-color);
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">一周天气查询</div>
+        <nav>
+            <ul>
+                <li><a href="#">一周天气查询</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section class="weather-form">
+            <h2>请选择查询方式</h2>
+            <form id="weatherForm">
+                <input type="radio" id="auto" name="mode" value="auto" checked>
+                <label for="auto">自动检测您的位置</label><br>
+                <input type="radio" id="ip" name="mode" value="ip">
+                <label for="ip">使用IP地址</label><br>
+                <input type="radio" id="city" name="mode" value="city">
+                <label for="city">输入城市</label><br>
+                <input type="text" id="ipInput" placeholder="请输入您的IP地址" style="display:none;">
+                <input type="text" id="cityInput" placeholder="请输入您需要查询的城市" style="display:none;">
+                <button type="button" onclick="getWeather()">查询天气!</button>
+            </form>
+        </section>
+        <div class="weather-result" id="weatherResult"></div>
+    </main>
+    <script>
+        document.querySelectorAll('input[name="mode"]').forEach((elem) => {
+            elem.addEventListener("change", function(event) {
+                const value = event.target.value;
+                document.getElementById("ipInput").style.display = (value === "ip") ? "block" : "none";
+                document.getElementById("cityInput").style.display = (value === "city") ? "block" : "none";
+            });
+        });
+
+        async function getWeather() {
+            const mode = document.querySelector('input[name="mode"]:checked').value;
+            let url = "https://api.vvhan.com/api/weather";
+            if (mode === "ip") {
+                const ip = document.getElementById("ipInput").value;
+                url += `?ip=${ip}&type=week`;
+            } else if (mode === "city") {
+                const city = document.getElementById("cityInput").value;
+                url += `?city=${city}&type=week`;
+            } else {
+                url += "?type=week";
+            }
+            
+            const response = await fetch(url);
+            const data = await response.json();
+            displayWeather(data);
+        }
+
+        function displayWeather(data) {
+            if (!data.success) {
+                document.getElementById("weatherResult").innerText = "Failed to fetch weather data.";
+                return;
+            }
+
+            const city = data.city;
+            const weatherData = data.data;
+            let resultHTML = `<h3>${city}的天气</h3><br>`;
+            weatherData.forEach(day => {
+                resultHTML += `
+                    <div class="project-box">
+                        <h4>${day.date} (${day.week})</h4>
+                        <p>昼: ${day.type}, ${day.low} - ${day.high}</p>
+                        <p>夜: ${day.night.type}</p>
+                        <p>风: ${day.fengxiang}, ${day.fengli}</p>
+                    </div>
+                `;
+            });
+            document.getElementById("weatherResult").innerHTML = resultHTML;
+        }
+    </script>
+</body>
+</html>

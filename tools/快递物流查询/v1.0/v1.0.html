@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>快递物流查询</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="logo">快递物流查询</div>
+        <nav>
+            <ul>
+                <li><a href="#">快递查询</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section id="express">
+            <h1>快递物流查询</h1>
+            <div class="express-query">
+                <input type="text" id="tracking-number" placeholder="输入快递单号...">
+                <input type="text" id="phone-last-4" placeholder="手机号后四位（顺丰需要）">
+                <button id="query-button">查询</button>
+            </div>
+            <div id="tracking-results"></div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 Sharon.</p>
+    </footer>
+    <script src="scripts.js"></script>
+</body>
+</html>
