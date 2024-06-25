@@ -28,7 +28,7 @@ document.getElementById('search-button').addEventListener('click', function () {
                             songDiv.innerHTML = `
                                 <h2>${songData.name}</h2>
                                 <p>${songData.author}</p>
-                                <p>市场：${songData.market}</p>
+                                <p>时长：${songData.market}</p>
                             `;
                             songDiv.addEventListener('click', function () {
                                 document.getElementById('song-img').src = songData.img || '';
