@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>查询字体版权</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Additional or overridden styles can go here if necessary */
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">查询字体版权</div>
+        <nav>
+            <ul>
+                <li><a href="#">字体版权查询</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section>
+            <h2>查询字体版权</h2>
+            <p>注:本字体版权查询网页仅供参考，具体字体请咨询专业人士</p>
+            <form id="font-form">
+                <label for="font-input">请输入字体名称：</label>
+                <input type="text" id="font-input" name="font" required>
+                <button type="submit">查询</button>
+            </form>
+            <br>
+            <div id="font-results" class="project-grid"></div>
+        </section>
+    </main>
+    <footer>
+        &copy; 2024 字体版权查询工具
+    </footer>
+    <script src="scripts.js"></script>
+</body>
+</html>

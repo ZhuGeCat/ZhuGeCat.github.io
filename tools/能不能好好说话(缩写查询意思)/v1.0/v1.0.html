@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>查询缩写意思</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* 可以在这里添加额外或覆盖的样式 */
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">查询缩写意思</div>
+        <nav>
+            <ul>
+                <li><a href="#">缩写查询</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section>
+            <h2>查询缩写意思</h2>
+            <form id="abbreviation-form">
+                <label for="abbreviation-input">请输入缩写：</label>
+                <input type="text" id="abbreviation-input" name="abbreviation" required>
+                <button type="submit">查询</button>
+            </form>
+            <br>
+            <div id="abbreviation-results" class="project-grid"></div>
+        </section>
+    </main>
+    <footer>
+        &copy; 2024 缩写查询工具
+    </footer>
+    <script src="scripts.js"></script>
+</body>
+</html>
