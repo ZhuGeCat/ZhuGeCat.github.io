@@ -1,3 +1,12 @@
+:root {
+    --primary-color: #2196F3;
+    --secondary-color: #C0E0F1;
+    --background-color: #F0F2F5;
+    --white-color: #FFFFFF;
+    --text-color: #333;
+    --shadow-color: #B8C3D3;
+}
+
 @font-face {
     font-family: "ZCOOLKuaile";
     src: url("../../../../fonts/站酷仓耳渔阳体 W05.TTF") format("truetype");
@@ -6,15 +15,6 @@
 @font-face {
     font-family: "YSHAOSHENTI";
     src: url("../../../../fonts/优设好身体.TTF") format("truetype");
-}
-
-:root {
-    --primary-color: #2196F3;
-    --secondary-color: #C0E0F1;
-    --background-color: #F0F2F5;
-    --white-color: #FFFFFF;
-    --text-color: #333;
-    --shadow-color: #B8C3D3;
 }
 
 body {
@@ -77,7 +77,7 @@ main {
     border: 1px solid var(--primary-color);
     border-radius: 4px;
     background-color: var(--white-color);
-    width: 100%;
+    width: 100%; /* 设置宽度，可以用百分比或具体像素值，例如200px */
 }
 
 #search-button {
@@ -95,30 +95,23 @@ main {
     color: var(--white-color);
 }
 
-#search-results {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
 .project-box {
     background-color: var(--white-color);
     padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px var(--shadow-color);
-    cursor: pointer;
-    transition: transform 0.2s;
-    width: calc(50% - 0.5rem); /* 每个项目框的宽度为50%，减去间距 */
     margin-bottom: 1rem;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
 }
 
 .project-box:hover {
-    transform: translateY(-4px);
+    transform: translateY(-5px);
 }
 
 #player {
     display: flex;
+    flex-direction: column;
     align-items: center;
     gap: 1rem;
     margin-top: 1rem;
@@ -126,9 +119,9 @@ main {
     background-color: var(--white-color);
     border-radius: 8px;
     box-shadow: 0 2px 4px var(--shadow-color);
-    width: 100%; /* 宽度占满父容器 */
-    max-width: 600px; /* 设置最大宽度 */
-    margin: 0 auto; /* 居中显示 */
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 #player img {
@@ -138,6 +131,7 @@ main {
 
 #player div {
     flex-grow: 1;
+    text-align: center; /* 居中文本 */
 }
 
 audio {
@@ -145,25 +139,34 @@ audio {
 }
 
 #lyrics-container {
-    max-width: 600px;
-    margin: 2rem auto;
-    padding: 1rem;
+    max-height: 200px;
+    overflow-y: scroll;
     background-color: var(--white-color);
+    padding: 1rem;
     border-radius: 8px;
     box-shadow: 0 2px 4px var(--shadow-color);
-    overflow-y: auto;
-    max-height: 300px; /* 控制歌词显示区域的最大高度 */
+    margin-top: 1rem;
 }
 
-#lyrics {
-    text-align: center;
-    white-space: pre-line;
+.current-lyric {
+    font-weight: bold;
+    color: var(--primary-color);
 }
 
-footer {
-    text-align: center;
-    padding: 1rem;
-    background-color: var(--white-color);
-    color: var(--text-color);
-    box-shadow: 0 -2px 4px var(--shadow-color);
+#toggle-container {
+    margin-top: 1rem;
+}
+
+#toggle-mode {
+    padding: 0.5rem 1rem;
+    background-color: var(--secondary-color);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#toggle-mode:hover {
+    background-color: var(--primary-color);
+    color: var(--white-color);
 }
