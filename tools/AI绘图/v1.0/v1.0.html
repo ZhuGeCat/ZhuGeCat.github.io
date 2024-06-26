@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI绘图工具</title>
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --secondary-color: #C0E0F1;
+            --background-color: #F0F2F5;
+            --white-color: #FFFFFF;
+            --text-color: #333;
+            --shadow-color: #B8C3D3;
+        }
+
+        @font-face {
+            font-family: "ZCOOLKuaile";
+            src: url("../../../fonts/站酷仓耳渔阳体 W05.TTF") format("truetype");
+        }
+
+        @font-face {
+            font-family: "YSHAOSHENTI";
+            src: url("../../../fonts/优设好身体.TTF") format("truetype");
+        }
+
+        body {
+            font-family: 'YSHAOSHENTI', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            background-color: var(--white-color);
+            color: var(--text-color);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 800px;
+            margin-top: 20px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+
+        nav ul li {
+            margin: 0 1rem;
+        }
+
+        nav ul li a {
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            padding: 2rem;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        section {
+            background-color: var(--white-color);
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        form label {
+            margin: 0.5rem 0 0.25rem 0;
+        }
+
+        form input, form select {
+            font-family: 'YSHAOSHENTI', sans-serif;
+            padding: 0.5rem;
+            border: 1px solid var(--primary-color);
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            background-color: var(--white-color);
+        }
+
+        form input{
+            width: 100%;
+        }
+
+        form button {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        form button:hover {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+        }
+
+        footer {
+            background-color: var(--white-color);
+            text-align: center;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            width: 100%;
+            max-width: 800px;
+            margin-top: 20px;
+        }
+
+        #image-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        img {
+            max-width: 100%;
+            margin-top: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .loading {
+            font-size: 1.2rem;
+            margin-top: 20px;
+        }
+
+        button{
+            font-family: 'YSHAOSHENTI', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">AI绘图工具</div>
+        <nav>
+            <ul>
+                <li><a href="#">AI绘图</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <section>
+            <form id="generate-form">
+                <label for="prompt">输入要绘制的内容：</label>
+                <input type="text" id="prompt" placeholder="英文，例如：cat" required>
+                <br><br>
+                <label for="model">选择绘图尺寸：</label>
+                <select id="model" required>
+                    <option value="normal">方形 (1:1)</option>
+                    <option value="vertical">竖形 (2:3)</option>
+                    <option value="horizontal">横形 (3:2)</option>
+                </select>
+                <br><br>
+                <button type="submit" id="generate-btn">生成图像</button>
+            </form>
+        </section>
+
+        <section id="image-container"></section>
+    </main>
+
+    <footer>
+        &copy; 2024 AI绘图工具
+    </footer>
+
+    <script>
+        document.getElementById('generate-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const prompt = document.getElementById('prompt').value.trim();
+            const model = document.getElementById('model').value;
+            const apiUrl = `https://api.pearktrue.cn/api/stablediffusion/?prompt=${encodeURIComponent(prompt)}&model=${model}`;
+
+            const imageContainer = document.getElementById('image-container');
+            imageContainer.innerHTML = '<p class="loading">加载中...</p>';
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        imageContainer.innerHTML = `
+                            <p>${data.msg}</p>
+                            <p>风格：${data.style}</p>
+                            <p>尺寸：${data.model}</p>
+                            <img src="${data.imgurl}" alt="生成的图像">
+                        `;
+                    } else {
+                        imageContainer.innerHTML = '<p class="loading">生成图像失败，请重试。</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('生成图像请求错误：', error);
+                    imageContainer.innerHTML = '<p class="loading">生成图像失败，请稍后再试。</p>';
+                });
+        });
+    </script>
+</body>
+</html>
