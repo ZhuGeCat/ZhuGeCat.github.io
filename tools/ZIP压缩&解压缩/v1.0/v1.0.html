@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ZIP Compression & Decompression</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, user-scalable=yes">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --secondary-color: #C0E0F1;
+            --background-color: #F0F2F5;
+            --white-color: #FFFFFF;
+            --text-color: #333;
+            --shadow-color: #B8C3D3;
+        }
+
+        @font-face {
+            font-family: "ZCOOLKuaile";
+            src: url("../../../fonts/站酷仓耳渔阳体 W05.TTF") format("truetype");
+        }
+
+        @font-face {
+            font-family: "YSHAOSHENTI";
+            src: url("../../../fonts/优设好身体.TTF") format("truetype");
+        }
+
+        body {
+            font-family: 'YSHAOSHENTI', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .form-horizontal {
+            background-color: var(--white-color);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        #loading {
+            display: none;
+            text-align: center;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .directory-tree {
+            list-style: none;
+            padding: 0;
+        }
+
+        .directory-tree li {
+            margin: 5px 0;
+        }
+
+        .directory-tree ul {
+            margin-left: 20px;
+        }
+
+        .directory-tree .file-link {
+            text-decoration: none;
+            color: var(--primary-color);
+        }
+
+        .directory-tree .file-link:hover {
+            text-decoration: underline;
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--primary-color);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .drop-zone:hover {
+            background-color: var(--secondary-color);
+        }
+
+        h1 {
+            font-size: 50px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<h1>Sharon的ZIP压缩&解压缩工具</h1>
+<div class="form-horizontal">
+    <div class="form-group">
+        <div class="drop-zone" id="drop-zone" ondragover="event.preventDefault()" ondrop="handleDrop(event)">
+            把文件拖到这里  或  点击来选择文件
+            <input id="file-upload" type="file" class="file" accept=".zip, .txt, .png, .jpeg, .jpg" multiple style="display:none">
+        </div>
+    </div>
+    <p>要解压文件时，请只上传一个ZIP文件</p>
+    <div class="form-group">
+        <button id="unzip-files" type="button" class="btn btn-lg btn-secondary" onclick="unzipFiles()">解压缩</button>
+        <button id="compress-files" type="button" class="btn btn-lg btn-primary" onclick="compressFiles()">压缩成ZIP</button>
+    </div>
+
+    <div class="form-group">
+        <div id="loading">加载中...</div>
+    </div>
+
+    <ul class="directory-tree" id="directory-tree"></ul>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+
+<script>
+    let zipFile = null;
+    let zipData = null;
+
+    function handleDrop(event) {
+        event.preventDefault();
+        zipFile = event.dataTransfer.files[0];
+
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(zipFile);
+        document.getElementById("file-upload").files = dataTransfer.files;
+    }
+
+    async function unzipFiles() {
+        if (!zipFile) {
+            alert("请先上传一个ZIP文件！");
+            return;
+        }
+
+        document.getElementById("loading").style.display = "block";
+
+        const reader = new FileReader();
+        reader.onload = async function() {
+            zipData = await JSZip.loadAsync(reader.result);
+
+            const directoryTree = document.getElementById("directory-tree");
+            directoryTree.innerHTML = "";
+
+            const zipContents = Object.keys(zipData.files).filter(path => path.trim() !== "");
+            const fileTree = buildFileTree(zipContents);
+
+            renderDirectoryTree(directoryTree, fileTree);
+
+            document.getElementById("loading").style.display = "none";
+        };
+        reader.readAsArrayBuffer(zipFile);
+    }
+
+    function buildFileTree(paths) {
+        const tree = {};
+
+        paths.forEach(path => {
+            const parts = path.split('/');
+            let currentNode = tree;
+
+            parts.forEach((part, idx) => {
+                if (!currentNode[part]) {
+                    currentNode[part] = idx === parts.length - 1 ? null : {};
+                }
+                currentNode = currentNode[part];
+            });
+        });
+
+        return tree;
+    }
+
+    function renderDirectoryTree(parent, tree, path = '') {
+        Object.keys(tree).forEach(key => {
+            const fullPath = path ? `${path}/${key}` : key;
+
+            if (key.trim() === "") return;
+
+            const item = document.createElement("li");
+
+            if (tree[key] === null) {
+                item.innerHTML = `<a href="#" class="file-link" onclick="downloadFile('${fullPath}')">${key}</a>`;
+            } else {
+                item.innerHTML = `<strong>${key}</strong>`;
+                const subTree = document.createElement("ul");
+                renderDirectoryTree(subTree, tree[key], fullPath);
+                item.appendChild(subTree);
+            }
+
+            parent.appendChild(item);
+        });
+    }
+
+    async function downloadFile(fullPath) {
+        const file = zipData.file(fullPath);
+        if (file) {
+            const blob = await file.async("blob");
+            saveAs(blob, fullPath.split('/').pop());
+        } else {
+            alert("文件未找到：" + fullPath);
+        }
+    }
+
+    function compressFiles() {
+        const zip = new JSZip();
+        const filesToCompress = document.getElementById("file-upload").files;
+
+        if (filesToCompress.length === 0) {
+            alert("请先选择要压缩的文件！");
+            return;
+        }
+
+        document.getElementById("loading").style.display = "block";
+
+        const compressPromises = Array.from(filesToCompress).map(file => {
+            return file.arrayBuffer().then(buffer => zip.file(file.name, buffer));
+        });
+
+        Promise.all(compressPromises).then(() => {
+            zip.generateAsync({ type: "blob" }).then(blob => {
+                saveAs(blob, "compressed.zip");
+                document.getElementById("loading").style.display = "none";
+            });
+        });
+    }
+
+    document.getElementById("drop-zone").addEventListener("click", () => {
+        document.getElementById("file-upload").click();
+    });
+
+    document.getElementById("file-upload").addEventListener("change", event => {
+        zipFile = event.target.files[0];
+    });
+</script>
+</body>
+</html>
