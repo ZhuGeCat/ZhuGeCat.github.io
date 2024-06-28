@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>签名生成</title>
+</head>
+<body>
+    <header>
+        <div class="logo">签名生成器</div>
+        <nav>
+            <ul>
+                <li><a href="#">签名生成</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section>
+            <h1>生成你的签名吧!</h1>
+            <form id="signatureForm">
+                <label for="word">输入你的名字:</label>
+                <input type="text" id="word" name="word" required>
+                
+                <label for="type">风格:</label>
+                <select id="type" name="type">
+                    <option value="hsq">花式签</option>
+                    <option value="swq">商务签</option>
+                    <option value="gxq">个性签</option>
+                    <option value="sxlbz">手写连笔字</option>
+                    <option value="zkt">正楷体</option>
+                    <option value="wrns">温柔女生</option>
+                    <option value="xsq">潇洒签</option>
+                    <option value="cjysq">超级艺术签</option>
+                    <option value="xsq">行书签</option>
+                    <option value="ksq">楷书签</option>
+                    <option value="qsq">情书签</option>
+                    <option value="xcq">行草签</option>
+                    <option value="ktkaq">卡通可爱签</option>
+                </select>
+                
+                <label for="size">大小:</label>
+                <input type="number" id="size" name="size" min="10" max="100" value="60">
+                
+                <button type="submit">生成</button>
+            </form>
+        </section>
+        <section>
+            <h2>结果:</h2>
+            <div id="signatureOutput"></div>
+        </section>
+    </main>
+    <footer>
+        &copy; 2024 签名生成器
+    </footer>
+    <script src="scripts.js"></script>
+</body>
+</html>
