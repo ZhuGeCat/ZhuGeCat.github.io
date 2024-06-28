@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图像编辑器</title>
+    <link rel="stylesheet" href="https://unpkg.com/tui-image-editor/dist/tui-image-editor.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        #tui-image-editor {
+            /* 设置为 auto 或者具体的像素值 */
+            height: auto;
+            max-height: calc(100% - 100px); /* 减少 100px 的高度 */
+        }
+        #picker {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    </style>    
+</head>
+<body>
+    <div id="tui-image-editor"></div>
+    <div id="picker"></div>
+    <p>可以复制↑颜色选择器的16进制色值到上面的编辑器里哦</p>
+
+    <script src="https://unpkg.com/tui-code-snippet/dist/tui-code-snippet.min.js"></script>
+    <script src="https://unpkg.com/tui-color-picker/dist/tui-color-picker.min.js"></script>
+    <script src="https://unpkg.com/tui-image-editor/dist/tui-image-editor.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
+    <script>
+        var imagePath = encodeURI('../../things/image/都市.png');
+        var imageEditor = new tui.ImageEditor(document.getElementById('tui-image-editor'), {
+            includeUI: {
+                loadImage: {
+                    path: imagePath, 
+                    name: '都市.png'
+                },
+                theme: {},
+                menuBarPosition: 'bottom',
+                initMenu: 'draw',
+            },
+            cssMaxWidth: window.innerWidth,
+            cssMaxHeight: window.innerHeight - 100,
+            selectionStyle: {
+                cornerSize: 20,
+                rotatingPointOffset: 70
+            }
+        });
+
+        var pickr = Pickr.create({
+            el: '#picker',
+            theme: 'classic',
+            default: 'rgba(244, 67, 54, 1)',
+            swatches: [
+                'rgba(244, 67, 54, 1)',
+                'rgba(233, 30, 99, 0.95)',
+                'rgba(156, 39, 176, 0.9)',
+                'rgba(103, 58, 183, 0.85)',
+                'rgba(63, 81, 181, 0.8)',
+                'rgba(33, 150, 243, 0.75)',
+                'rgba(3, 169, 244, 0.7)',
+                'rgba(0, 188, 212, 0.7)',
+                'rgba(0, 150, 136, 0.75)',
+                'rgba(76, 175, 80, 0.8)',
+                'rgba(139, 195, 74, 0.85)',
+                'rgba(205, 220, 57, 0.9)',
+                'rgba(255, 235, 59, 0.95)',
+                'rgba(255, 193, 7, 1)'
+            ],
+            components: {
+                preview: true,
+                opacity: true,
+                hue: true,
+                interaction: {
+                    hex: true,
+                    rgba: true,
+                    input: true,
+                    clear: true,
+                    save: true
+                }
+            }
+        });
+
+        pickr.on('save', (color, instance) => {
+            var rgbaColor = color.toRGBA().toString();
+            imageEditor.startDrawingMode('FREE_DRAWING');
+            imageEditor.setBrush({
+                width: 12,
+                color: rgbaColor
+            });
+        });
+
+        // 更新图像编辑器的最大高度
+        function updateEditorSize() {
+            imageEditor.ui.resizeEditor({
+                cssMaxWidth: window.innerWidth,
+                cssMaxHeight: window.innerHeight - 100
+            });
+        }
+
+        // 监听窗口大小变化，并更新图像编辑器的最大高度
+        window.addEventListener('resize', updateEditorSize);
+
+        // 页面加载时也更新一次尺寸
+        updateEditorSize();
+    </script>    
+</body>
+</html>

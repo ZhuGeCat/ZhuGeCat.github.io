@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图表生成器</title>
+    <style>
+        @font-face {
+            font-family: "ZCOOLKuaile";
+            src: url("../../../fonts/站酷仓耳渔阳体\ W05.TTF") format("truetype");
+        }
+
+        @font-face {
+            font-family: "YSHAOSHENTI";
+            src: url("../../../fonts/优设好身体.TTF") format("truetype");
+        }
+
+        body, html {
+            font-family: "YSHAOSHENTI";
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 1;
+        }
+        .container {
+            display: flex;
+            width: 90%;
+            max-width: 1200px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background-color: #ffffff;
+            z-index: 2;
+        }
+        .form-container, .chart-container {
+            flex: 1;
+            padding: 20px;
+        }
+        .form-container {
+            border-right: 1px solid #ddd;
+            background-color: #fafafa;
+            border-radius: 8px 0 0 8px;
+        }
+        #dataEntries {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #ffffff;
+        }
+        .dataset {
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        .entry {
+            margin-bottom: 10px;
+        }
+        input[type="text"],
+        input[type="number"] {
+            margin-right: 10px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: calc(50% - 22px);
+        }
+        button {
+            font-family: "ZCOOLKuaile";
+            padding: 10px;
+            margin: 5px;
+            border: none;
+            background-color: #4c82af;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        button:hover {
+            background-color: #1b81d5;
+            transform: scale(1.05);
+        }
+        button:active {
+            background-color: #4c82af;
+        }
+        canvas {
+            width: 100%;
+            height: 400px;
+        }
+        h1{
+            font-family: "ZCOOLKuaile";
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" class="stars"></canvas>
+    <div class="container">
+        <div class="form-container">
+            <h1>图表生成器</h1>
+            <form id="dataForm">
+                <div id="dataEntries">
+                    <div class="dataset">
+                        <input type="text" name="datasetName[]" placeholder="数据集名称">
+                        <button type="button" onclick="addDataPoint(this.parentElement)">增加数据点</button>
+                        <div class="dataPoints">
+                            <div class="entry">
+                                <input type="text" name="labels[]" placeholder="数据点名称">
+                                <input type="number" name="values[]" placeholder="数据点数值">
+                                <button type="button" onclick="removeDataPoint(this.parentElement)">删除</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" onclick="addDataset()">增加数据集</button>
+                <button type="button" onclick="removeDataset()">删除数据集</button>
+                <div>
+                    <input type="radio" id="barChart" name="chartType" value="bar">
+                    <label for="barChart">条形统计图</label>
+                    <input type="radio" id="lineChart" name="chartType" value="line" checked>
+                    <label for="lineChart">折线统计图</label>
+                    <input type="radio" id="pieChart" name="chartType" value="pie">
+                    <label for="pieChart">饼状图</label>
+                </div>
+                <button type="submit">生成图表！</button>
+            </form>
+        </div>
+        <div class="chart-container">
+            <canvas id="myChart"></canvas>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // 星空背景代码
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let w = canvas.width = window.innerWidth;
+        let h = canvas.height = window.innerHeight;
+        const hue = 217;
+        const stars = [];
+        let count = 0;
+        const maxStars = 1500;
+
+        const canvas2 = document.createElement('canvas');
+        const w2 = canvas2.width = 100;
+        const h2 = canvas2.height = 100;
+        const ctx2 = canvas2.getContext('2d');
+
+        const gradientCache = ctx2.createRadialGradient(w2 / 2, h2 / 2, 0, w2 / 2, h2 / 2, w2 / 2);
+        gradientCache.addColorStop(0.025, '#fff');
+        gradientCache.addColorStop(0.1, `hsl(${hue}, 61%, 33%)`);
+        gradientCache.addColorStop(0.25, `hsl(${hue}, 64%, 6%)`);
+        gradientCache.addColorStop(1, 'transparent');
+        ctx2.fillStyle = gradientCache;
+        ctx2.beginPath();
+        ctx2.arc(w2 / 2, h2 / 2, w2 / 2, 0, Math.PI * 2);
+        ctx2.fill();
+
+        function random(min, max) {
+            if (arguments.length < 2) {
+                max = min;
+                min = 0;
+            }
+            if (min > max) {
+                [min, max] = [max, min];
+            }
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function maxOrbit(x, y) {
+            const max = Math.max(x, y);
+            return Math.round(Math.sqrt(max * max + max * max)) / 2;
+        }
+
+        class Star {
+            constructor() {
+                this.orbitRadius = random(maxOrbit(w, h));
+                this.radius = random(60, this.orbitRadius) / 10;
+                this.orbitX = w / 2;
+                this.orbitY = h / 2;
+                this.timePassed = random(2, maxStars);
+                this.speed = random(this.orbitRadius) / 120000;
+                this.alpha = random(2, 10) / 10;
+                count++;
+                stars[count] = this;
+            }
+
+            draw() {
+                const x = Math.sin(this.timePassed) * this.orbitRadius + this.orbitX;
+                const y = Math.cos(this.timePassed) * this.orbitRadius + this.orbitY;
+                const twinkle = random(10);
+
+                if (twinkle === 1 && this.alpha > 0) {
+                    this.alpha -= 0.05;
+                } else if (twinkle === 2 && this.alpha < 1) {
+                    this.alpha += 0.05;
+                }
+
+                ctx.globalAlpha = this.alpha;
+                ctx.drawImage(canvas2, x - this.radius / 2, y - this.radius / 2, this.radius, this.radius);
+                this.timePassed += this.speed;
+            }
+        }
+
+        for (let i = 0; i < maxStars; i++) {
+            new Star();
+        }
+
+        function start() {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = `hsla(${hue}, 64%, 6%, 0.2)`;
+            ctx.fillRect(0, 0, w, h);
+
+            ctx.globalCompositeOperation = 'lighter';
+            for (let i = 1; i < stars.length; i++) {
+                stars[i].draw();
+            }
+
+            window.requestAnimationFrame(start);
+        }
+
+        window.addEventListener('resize', () => {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        });
+
+        start();
+
+        // 图表生成器代码
+        const form = document.getElementById('dataForm');
+        const dataEntries = document.getElementById('dataEntries');
+        const myChartCanvas = document.getElementById('myChart');
+        let myChart = null;
+
+        const colors = [
+            'rgba(255, 99, 132, 0.2)',
+            'rgba(54, 162, 235, 0.2)',
+            'rgba(255, 206, 86, 0.2)',
+            'rgba(75, 192, 192, 0.2)',
+            'rgba(153, 102, 255, 0.2)',
+            'rgba(255, 159, 64, 0.2)'
+        ];
+
+        const borderColors = [
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)'
+        ];
+
+        function addDataset() {
+            const div = document.createElement('div');
+            div.className = 'dataset';
+            div.innerHTML = `
+                <input type="text" name="datasetName[]" placeholder="数据集名称">
+                <button type="button" onclick="addDataPoint(this.parentElement)">增加数据点</button>
+                <div class="dataPoints"></div>
+            `;
+            dataEntries.appendChild(div);
+            addDataPoint(div);  // 自动添加一个数据点条目
+        }
+
+        function removeDataset() {
+            if (dataEntries.children.length > 1) {
+                dataEntries.removeChild(dataEntries.lastChild);
+            }
+        }
+
+        function addDataPoint(datasetDiv) {
+            const dataPointsDiv = datasetDiv.querySelector('.dataPoints');
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'entry';
+            entryDiv.innerHTML = `
+                <input type="text" name="labels[]" placeholder="数据点名称">
+                <input type="number" name="values[]" placeholder="数据点数值">
+                <button type="button" onclick="removeDataPoint(this.parentElement)">删除</button>
+            `;
+            dataPointsDiv.appendChild(entryDiv);
+        }
+
+        function removeDataPoint(entryDiv) {
+            const dataPointsDiv = entryDiv.parentElement;
+            if (dataPointsDiv.children.length > 1) {
+                dataPointsDiv.removeChild(entryDiv);
+            }
+        }
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(form);
+            const datasetNames = formData.getAll('datasetName[]');
+            const datasets = [];
+            const labelsArray = [];
+
+            document.querySelectorAll('.dataset').forEach((dataset, index) => {
+                const labels = Array.from(dataset.querySelectorAll('input[name="labels[]"]')).map(input => input.value);
+                const values = Array.from(dataset.querySelectorAll('input[name="values[]"]')).map(input => parseFloat(input.value));
+                labelsArray[index] = labels; // 存储每个数据集的标签
+                datasets.push({
+                    label: datasetNames[index],
+                    data: values,
+                    backgroundColor: colors[index % colors.length],
+                    borderColor: borderColors[index % borderColors.length],
+                    borderWidth: 2,
+                    fill: false
+                });
+            });
+
+            const chartType = formData.get('chartType');
+            updateChart(chartType, labelsArray, datasets);
+        });
+
+        function updateChart(type, labelsArray, datasets) {
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            if (type === 'line') {
+                const scales = {
+                    y: { beginAtZero: true }
+                };
+
+                datasets.forEach((dataset, index) => {
+                    scales[`x-${index}`] = {
+                        type: 'category',
+                        labels: labelsArray[index],
+                        display: true // 每个数据集显示自己的x轴
+                    };
+                    dataset.xAxisID = `x-${index}`;
+                });
+
+                myChart = new Chart(myChartCanvas, {
+                    type: type,
+                    data: {
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: scales,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.label}: ${context.raw}`;
+                                    }
+                                }
+                            }
+                        },
+                        animation: {
+                            duration: 2000, // 设置动画持续时间
+                            easing: 'easeInOutBounce' // 动画缓动效果
+                        }
+                    }
+                });
+            } else if (type === 'pie') {
+                const pieData = {
+                    labels: [],
+                    datasets: []
+                };
+
+                datasets.forEach((dataset, index) => {
+                    dataset.data.forEach((value, i) => {
+                        if (!pieData.labels.includes(labelsArray[index][i])) {
+                            pieData.labels.push(labelsArray[index][i]);
+                        }
+                    });
+                });
+
+                datasets.forEach((dataset, datasetIndex) => {
+                    const data = pieData.labels.map(label => {
+                        const labelIndex = labelsArray[datasetIndex].indexOf(label);
+                        return labelIndex !== -1 ? dataset.data[labelIndex] : 0;
+                    });
+
+                    pieData.datasets.push({
+                        label: dataset.label,
+                        data: data,
+                        backgroundColor: colors,
+                        borderColor: borderColors,
+                        borderWidth: 2,
+                        fill: false
+                    });
+                });
+
+                myChart = new Chart(myChartCanvas, {
+                    type: 'pie',
+                    data: pieData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const dataset = context.dataset;
+                                        const index = context.dataIndex;
+                                        const label = context.label || '';
+                                        const value = dataset.data[index];
+                                        const total = dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(2);
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        animation: {
+                            duration: 2000, // 设置动画持续时间
+                            easing: 'easeInOutBounce' // 动画缓动效果
+                        }
+                    }
+                });
+            } else if (type === 'bar') {
+                const groupedLabels = [...new Set(labelsArray.flat())];
+                const groupedData = datasets.map(dataset => {
+                    return {
+                        ...dataset,
+                        data: groupedLabels.map(label => {
+                            const dataIndex = labelsArray[datasets.indexOf(dataset)].indexOf(label);
+                            return dataIndex !== -1 ? dataset.data[dataIndex] : 0;
+                        })
+                    };
+                });
+
+                myChart = new Chart(myChartCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: groupedLabels,
+                        datasets: groupedData
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                beginAtZero: true
+                            },
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.label}: ${context.raw}`;
+                                    }
+                                }
+                            }
+                        },
+                        animation: {
+                            duration: 2000, // 设置动画持续时间
+                            easing: 'easeInOutBounce' // 动画缓动效果
+                        }
+                    }
+                });
+            }
+        }
+
+        window.onload = () => {
+            addDataset(); // 初始调用以添加第一个数据集和数据条目
+        };
+    </script>
+</body>
+</html>

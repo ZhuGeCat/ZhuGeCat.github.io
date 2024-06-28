@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown在线编辑</title>
+    <link rel="stylesheet" href="https://unpkg.com/editor.md@1.5.0/css/editormd.min.css">
+    <style>
+        @font-face {
+            font-family: "ZCOOLKuaile";
+            src: url("../../../fonts/站酷仓耳渔阳体\ W05.TTF") format("truetype");
+        }
+
+        @font-face {
+            font-family: "YSHAOSHENTI";
+            src: url("../../../fonts/优设好身体.TTF") format("truetype");
+        }
+        body{
+            font-family: "YSHAOSHENTI";
+        }
+        /* 夜间模式样式 */
+        .dark-mode {
+            background-color: #333;
+            color: #ccc;
+        }
+        .dark-mode .editormd {
+            border-color: #444;
+        }
+        .dark-mode .editormd-preview-container {
+            background-color: #2b2b2b;
+            color: #ccc;
+        }
+        .dark-mode .editormd-menu > li > a {
+            color: #ccc;
+        }
+        /* 标题栏样式 */
+        .editor-header {
+            position: relative;
+            padding: 5px;
+            background-color: #f6f6f6;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+        .editor-header h1 {
+            display: inline-block;
+            margin: 0;
+            font-size: 24px;
+            line-height: 30px;
+        }
+        /* 切换按钮样式 */
+        #toggle-theme {
+            font-family: "YSHAOSHENTI";
+            display: inline-block;
+            margin-left: 15px;
+            padding: 6px 12px;
+            font-size: 14px;
+            line-height: 20px;
+            color: #6576FF;
+            text-align: center;
+            vertical-align: middle;
+            cursor: pointer;
+            background-color: #EEF0FF;
+            border: 1px solid #C1C8FF;
+            border-radius: 4px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        #toggle-theme:hover{
+            background-color: #6576FF;
+            border-color: #6576FF;
+            color: #ffffff; /* 按钮悬停时文字颜色 */
+        }
+        .dark-mode #toggle-theme {
+            color: #ccc;
+            background-color: #555;
+            border-color: #666;
+        }
+        .dark-mode #toggle-theme:hover, .dark-mode #toggle-theme:focus {
+            background-color: #666;
+            border-color: #777;
+        }
+        h1{
+            font-family: "ZCOOLKuaile";
+        }
+    </style>
+</head>
+<body class="nk-body npc-invest bg-lighter">
+    <!-- 标题栏 -->
+    <div class="editor-header">
+        <h1>Markdown在线编辑</h1>
+        <button id="toggle-theme">切换为夜晚模式</button>
+    </div>
+    <!-- 编辑器容器 -->
+    <div id="editor"></div>
+    <div>
+        <p>这是一个Markdown在线编辑器</p>
+    </div>
+
+    <script src="//lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://unpkg.com/editor.md@1.5.0/editormd.min.js"></script>
+    <script>
+        $(function() {
+            var editor = editormd("editor", {
+                width: "90%",
+                height: 640,
+                path: "https://unpkg.com/editor.md@1.5.0/lib/",
+                theme: "default",
+                editorTheme: "default",
+                previewTheme: "default",
+                markdown: '## 欢迎使用Markdown编辑器',
+                codeFold: true,
+                saveHTMLToTextarea: true,
+                searchReplace: true,
+                htmlDecode: "style,script,iframe|on*",
+                emoji: true,
+                taskList: true,
+                tocm: true,
+                tex: true,
+                flowChart: true,
+                sequenceDiagram: true,
+            });
+
+            $('#toggle-theme').on('click', function() {
+                var currentTheme = editor.settings.theme;
+                var newTheme = currentTheme === "default" ? "dark" : "default";
+                editor.setTheme(newTheme);
+                editor.setPreviewTheme(newTheme === "default" ? "default" : "dark");
+                editor.setEditorTheme(newTheme === "default" ? "default" : "pastel-on-dark");
+                $(this).text(newTheme === "default" ? "切换为夜晚模式" : "切换为白昼模式");
+            });
+        });
+    </script>
+</body>
+</html>

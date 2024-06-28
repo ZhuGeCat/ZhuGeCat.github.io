@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>图片类型转换</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, user-scalable=yes">
+    <meta name="keywords" content="Image Conversion, JPG, PNG, BMP, GIF, WEBP, ICO">
+    <meta name="description" content="Convert image formats, supporting JPG, PNG, BMP, GIF, WEBP, ICO">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+    <style>
+        @font-face {
+            font-family: "ZCOOLKuaile";
+            src: url("../../../fonts/站酷仓耳渔阳体\ W05.TTF") format("truetype");
+        }
+
+        @font-face {
+            font-family: "YSHAOSHENTI";
+            src: url("../../../fonts/优设好身体.TTF") format("truetype");
+        }
+        
+        body {
+            font-family: "ZCOOLKuaile";
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        .form-horizontal {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .radio-inline {
+            margin-right: 10px;
+        }
+
+        #download, #select-all, #download-selected, #deselect-all, #download-zip {
+            display: none;
+        }
+
+        #loading {
+            display: none;
+            text-align: center;
+            color: red;
+            font-weight: bold;
+        }
+
+        .drop-zone {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .drop-zone:hover {
+            background-color: #e0e0e0;
+        }
+
+        .thumbnails {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .thumbnail-card {
+            background-color: rgba(240, 240, 240, 0.7);
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .thumbnail-card img {
+            width: 100%; /* Full width, respecting aspect ratio */
+            height: auto;
+        }
+
+        .buttons-row {
+            display: flex;
+            justify-content: space-between; /* Align buttons in the same row */
+        }
+        h1{
+            font-family: "ZCOOLKuaile";
+            font-size: 50px;
+        }
+    </style>
+</head>
+<body>
+<h1>Sharon的图片类型转换器</h1>
+<div class="form-horizontal">
+    <div class="form-group">
+        <div class="drop-zone" id="drop-zone" ondragover="event.preventDefault()" ondrop="handleDrop(event)">
+            把图片拖到这里  或  点击来选择图片
+            <input id="file-upload" type="file" class="file" accept="image/*" multiple style="display:none">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="radio-inline"><strong>转换成:</strong></label>
+        <label class="radio-inline">
+            <input type="radio" name="image_type" value="png" checked="checked"> PNG
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="image_type" value="jpeg"> JPEG
+        </label>
+        <label>
+            <input type="radio" name="image_type" value="ico"> ICO
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="image_type" value="bmp"> BMP
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="image_type" value="webp"> WEBP
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="image_type" value="svg"> SVG
+        </label>
+    </div>
+
+    <div class="form-group">
+        <button id="convert" type="button" class="btn btn-lg btn-block btn-primary" onclick="convertImages()">转换</button>
+    </div>
+
+    <div class="form-group">
+        <div id="loading">转换中...</div>
+    </div>
+
+    <div class="thumbnails" id="thumbnails"></div>
+
+    <div class="form-group buttons-row">
+        <button id="select-all" type="button" class="btn btn-lg btn-secondary" onclick="selectAllThumbnails()">全选</button>
+        <button id="deselect-all" type="button" class="btn btn-lg btn-danger" onclick="deselectAllThumbnails()">取消全选</button>
+        <button id="download-selected" type="button" class="btn btn-lg btn-success" onclick="downloadSelected()">直接下载图片</button>
+        <button id="download-zip" type="button" class="btn btn-lg btn-info" onclick="downloadZip()">下载ZIP文件</button>
+    </div>
+
+    <div class="form-group">
+        <a id="download" class="btn btn-lg btn-block" download></a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+
+<script>
+    let filesToConvert = []; // Array to store files for conversion
+    let thumbnails = []; // Array to store thumbnail information
+
+    function handleDrop(event) {
+        event.preventDefault();
+        filesToConvert = [...event.dataTransfer.files]; // Update files array
+
+        const dataTransfer = new DataTransfer(); // For input file selection
+        filesToConvert.forEach(file => dataTransfer.items.add(file));
+        document.getElementById("file-upload").files = dataTransfer.files;
+    }
+
+    function convertImages() {
+        if (!filesToConvert.length) {
+            alert("Please upload images!");
+            return;
+        }
+
+        const format = document.querySelector('input[name="image_type"]:checked').value;
+        const thumbnailsContainer = document.getElementById("thumbnails");
+        thumbnailsContainer.innerHTML = ""; // Clear previous thumbnails
+        thumbnails = []; // Clear previous thumbnail information
+
+        document.getElementById("loading").style.display = "block";
+        document.getElementById("download").style.display = "none";
+        document.getElementById("select-all").style.display = "none";
+        document.getElementById("deselect-all").style.display = "none";
+        document.getElementById("download-selected").style.display = "none";
+        document.getElementById("download-zip").style.display = "none";
+
+        filesToConvert.forEach((file, idx) => {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const dataURL = reader.result;
+                
+                const blob = new Blob([dataURL], {type: `image/${format}`});
+                const filename = `${file.name.split('.')[0]}.${format}`;
+
+                thumbnails.push({ filename, blob }); // Store thumbnail info
+
+                const thumbnailCard = document.createElement("div");
+                thumbnailCard.className = "thumbnail-card";
+                thumbnailCard.innerHTML = `
+                    <input type="checkbox" name="image-select" value="${filename}" />
+                    <img src="${URL.createObjectURL(blob)}" alt="${filename}" onclick="toggleSelection(this)" />
+                `;
+                thumbnailsContainer.appendChild(thumbnailCard);
+
+                if (idx === filesToConvert.length - 1) { // When all files processed
+                    document.getElementById("loading").style.display = "none";
+                    document.getElementById("select-all").style.display = "block";
+                    document.getElementById("deselect-all").style.display = "block";
+                    document.getElementById("download-selected").style.display = "block";
+                    document.getElementById("download-zip").style.display = "block";
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+    }
+
+    function selectAllThumbnails() {
+        document.querySelectorAll('input[name="image-select"]').forEach(checkbox => {
+            checkbox.checked = true; // Select all checkboxes
+        });
+    }
+
+    function deselectAllThumbnails() {
+        document.querySelectorAll('input[name="image-select"]').forEach(checkbox => {
+            checkbox.checked = false; // Deselect all checkboxes
+        });
+    }
+
+    function downloadSelected() {
+        const selectedImages = document.querySelectorAll('input[name="image-select"]:checked');
+        if (!selectedImages.length) {
+            alert("请至少选择一张图片！");
+            return;
+        }
+
+        selectedImages.forEach(checkbox => {
+            const selectedFile = thumbnails.find(thumbnail => thumbnail.filename === checkbox.value);
+            saveAs(selectedFile.blob, selectedFile.filename); // Use FileSaver.js to save the image
+        });
+    }
+
+    function downloadZip() {
+        const selectedImages = document.querySelectorAll('input[name="image-select"]:checked');
+        if (!selectedImages.length) {
+            alert("请至少选择一张图片！");
+            return;
+        }
+
+        const zip = new JSZip(); // New ZIP for selected files
+
+        selectedImages.forEach(checkbox => {
+            const selectedFile = thumbnails.find(thumbnail => thumbnail.filename === checkbox.value);
+            zip.file(selectedFile.filename, selectedFile.blob); // Add to ZIP
+        });
+
+        zip.generateAsync({ type: "blob" }).then(blob => {
+            saveAs(blob, "selected_images.zip"); // Use FileSaver.js to save the ZIP file
+        });
+    }
+
+    function toggleSelection(image) {
+        const checkbox = image.previousElementSibling; // Get checkbox preceding image
+        checkbox.checked = !checkbox.checked; // Toggle checkbox state
+    }
+
+    document.getElementById("drop-zone").addEventListener("click", () => {
+        document.getElementById("file-upload").click(); // Trigger file input click event
+    });
+
+    document.getElementById("file-upload").addEventListener("change", event => {
+        filesToConvert = [...event.target.files]; // Update files array from input selection
+    });
+</script>
+</body>
+</html>
