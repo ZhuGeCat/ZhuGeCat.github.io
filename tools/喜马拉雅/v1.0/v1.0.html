@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>喜马拉雅音频搜索</title>
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --secondary-color: #C0E0F1;
+            --background-color: #F0F2F5;
+            --white-color: #FFFFFF;
+            --text-color: #333;
+            --shadow-color: #B8C3D3;
+        }
+
+        @font-face {
+            font-family: "ZCOOLKuaile";
+            src: url("../../../fonts/站酷仓耳渔阳体 W05.TTF") format("truetype");
+        }
+
+        @font-face {
+            font-family: "YSHAOSHENTI";
+            src: url("../../../fonts/优设好身体.TTF") format("truetype");
+        }
+
+        body {
+            font-family: 'YSHAOSHENTI', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: var(--white-color);
+            color: var(--text-color);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            border-radius: 8px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+
+        nav ul li {
+            margin: 0 1rem;
+        }
+
+        nav ul li a {
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        main img {
+            width: 150px;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        section {
+            background-color: var(--white-color);
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            width: 80%;
+            text-align: center;
+        }
+
+        #results, #episodes {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .project-box {
+            background-color: var(--white-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            padding: 1rem;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .project-box:hover {
+            background-color: var(--secondary-color);
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        form label {
+            margin: 0.5rem 0 0.25rem 0;
+        }
+
+        form input, form textarea {
+            font-family: 'YSHAOSHENTI', sans-serif;
+            padding: 0.5rem;
+            border: 1px solid var(--primary-color);
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            background-color: var(--white-color);
+            width: 80%;
+        }
+
+        form button {
+            font-family: 'YSHAOSHENTI', sans-serif;
+            margin-top: 1rem;
+            padding: 0.5rem;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        form button:hover {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+        }
+
+        footer {
+            background-color: var(--white-color);
+            text-align: center;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            width: 100%;
+        }
+
+        #audioPlayer {
+            margin-top: 20px;
+            text-align: center;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .audio-player .content {
+            width: 100%;
+        }
+
+        .audio-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            width: 80%;
+            background-color: var(--secondary-color);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 10px 0;
+            cursor: pointer; /* 添加光标样式 */
+        }
+
+        .progress {
+            height: 10px;
+            background-color: var(--primary-color);
+            width: 0;
+        }
+
+        .time {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">喜马拉雅音频搜索</div>
+        <nav>
+            <ul>
+                <li><a href="#">喜马拉雅</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section>
+            <form id="searchForm">
+                <label for="keyword">输入搜索关键词:</label>
+                <input type="text" id="keyword" name="keyword" required>
+                <button type="submit">搜索</button>
+            </form>
+        </section>
+        <section id="audioPlayerSection">
+            <div id="audioPlayer"></div>
+        </section>
+        <section id="resultsSection">
+            <div id="results"></div>
+        </section>
+        <section id="episodesSection" style="display: none;">
+            <div id="episodes"></div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 喜马拉雅音频搜索</p>
+    </footer>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const keyword = document.getElementById('keyword').value;
+            document.getElementById('episodesSection').style.display = 'none';
+            document.getElementById('audioPlayer').innerHTML = '';
+            fetch(`https://www.hhlqilongzhu.cn/api/ximalaya/ximalaya.php?name=${keyword}`)
+                .then(response => response.json())
+                .then(data => displayResults(data.data));
+        });
+
+        function displayResults(results) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+            results.forEach(result => {
+                const resultDiv = document.createElement('div');
+                resultDiv.classList.add('project-box');
+                resultDiv.innerHTML = `
+                    <img src="${result.cover}" alt="${result.title}">
+                    <h2>${result.title}</h2>
+                    <p>${result.intro}</p>
+                `;
+                resultDiv.addEventListener('click', () => fetchEpisodes(result.albumId));
+                resultsDiv.appendChild(resultDiv);
+            });
+        }
+
+        function fetchEpisodes(albumId) {
+            fetch(`https://www.hhlqilongzhu.cn/api/ximalaya/ximalaya.php?albumId=${albumId}`)
+                .then(response => response.json())
+                .then(data => displayEpisodes(data.data, data.albumTitle));
+        }
+
+        function displayEpisodes(episodes, albumTitle) {
+            const episodesSection = document.getElementById('episodesSection');
+            const episodesDiv = document.getElementById('episodes');
+            episodesSection.style.display = 'block';
+            episodesDiv.innerHTML = `<h2>${albumTitle}</h2>`;
+            episodes.forEach(episode => {
+                const episodeDiv = document.createElement('div');
+                episodeDiv.classList.add('project-box');
+                episodeDiv.innerHTML = `<p>${episode.title}</p>`;
+                episodeDiv.addEventListener('click', () => fetchEpisodeDetails(episode.trackId));
+                episodesDiv.appendChild(episodeDiv);
+            });
+        }
+
+        function fetchEpisodeDetails(trackId) {
+            fetch(`https://www.hhlqilongzhu.cn/api/ximalaya/ximalaya.php?trackId=${trackId}`)
+                .then(response => response.json())
+                .then(data => displayEpisodeDetails(data));
+        }
+
+        function displayEpisodeDetails(details) {
+            const audioPlayerDiv = document.getElementById('audioPlayer');
+            audioPlayerDiv.innerHTML = `
+                <div class="project-box">
+                    <h3>${details.title}</h3>
+                    <p>主播: ${details.nickname}</p>
+                    <img src="${details.cover}" alt="${details.title}">
+                    <p><a href="${details.link}" target="_blank">播放链接</a></p>
+                    <audio id="audio" controls>
+                        <source src="${details.url}" type="audio/mpeg">
+                        您的浏览器不支持音频播放。
+                    </audio>
+                    <div class="audio-controls">
+                        <div class="progress-bar">
+                            <div class="progress" id="progress"></div>
+                        </div>
+                        <div class="time">
+                            <span id="currentTime">00:00</span>
+                            <span id="duration">00:00</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            const audio = document.getElementById('audio');
+            const progress = document.getElementById('progress');
+            const currentTimeElement = document.getElementById('currentTime');
+            const durationElement = document.getElementById('duration');
+
+            audio.addEventListener('timeupdate', () => {
+                const currentTime = formatTime(audio.currentTime);
+                const duration = formatTime(audio.duration);
+                const progressPercent = (audio.currentTime / audio.duration) * 100;
+                progress.style.width = `${progressPercent}%`;
+                currentTimeElement.textContent = currentTime;
+                durationElement.textContent = duration;
+            });
+
+            // 添加点击进度条时的处理
+            const progressBar = document.querySelector('.progress-bar');
+            progressBar.addEventListener('click', (event) => {
+                const clickX = event.clientX - progressBar.getBoundingClientRect().left;
+                const percent = clickX / progressBar.clientWidth;
+                const newTime = percent * audio.duration;
+                audio.currentTime = newTime;
+            });
+
+            function formatTime(seconds) {
+                const min = Math.floor(seconds / 60);
+                const sec = Math.floor(seconds % 60);
+                return `${min}:${sec < 10 ? '0' + sec : sec}`;
+            }
+        }
+    </script>
+</body>
+</html>
