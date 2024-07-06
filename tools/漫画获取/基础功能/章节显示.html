@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>漫画章节展示</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            text-align: center;
+        }
+        #input-area {
+            width: 100%;
+            height: 200px;
+        }
+        #submit-btn {
+            margin: 10px 0;
+        }
+        #chapter-container {
+            margin-top: 20px;
+        }
+        .chapter-item {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <h1>漫画章节展示</h1>
+    <p>信息获取:https://www.kuaikanmanhua.com/v2/pweb/topic/您在<a href="章节显示.html">搜索结果展示网页</a>中获取到的漫画ID</p>
+    <p>下一站:<a href="图片显示.html">章节具体内容显示网页</a></p>
+    <textarea id="input-area" placeholder="在此处输入JSON数据"></textarea>
+    <button id="submit-btn">显示章节列表</button>
+    <div id="chapter-container"></div>
+
+    <script>
+        document.getElementById('submit-btn').addEventListener('click', function() {
+            const inputData = document.getElementById('input-area').value;
+            try {
+                const jsonData = JSON.parse(inputData);
+                const chapters = jsonData.data.topic_info.comics;
+
+                const chapterContainer = document.getElementById('chapter-container');
+                chapterContainer.innerHTML = ''; // 清空之前的章节列表
+
+                chapters.forEach(chapter => {
+                    const chapterItem = document.createElement('div');
+                    chapterItem.className = 'chapter-item';
+
+                    const chapterTitle = document.createElement('span');
+                    chapterTitle.textContent = chapter.title;
+
+                    const chapterId = document.createElement('span');
+                    chapterId.textContent = `ID: ${chapter.id}`;
+
+                    chapterItem.appendChild(chapterTitle);
+                    chapterItem.appendChild(chapterId);
+
+                    chapterContainer.appendChild(chapterItem);
+                });
+            } catch (e) {
+                alert('输入的JSON数据格式不正确，请重新输入');
+            }
+        });
+    </script>
+</body>
+</html>
