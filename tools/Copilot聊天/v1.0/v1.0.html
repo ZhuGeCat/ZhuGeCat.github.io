@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .chat-container {
+            width: 50%;
+            max-width: 600px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .messages {
+            height: 300px;
+            overflow-y: scroll;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 5px 10px;
+            border-radius: 10px;
+        }
+        .message.user {
+            background-color: #d1e7dd;
+            align-self: flex-end;
+        }
+        .message.assistant {
+            background-color: #f8d7da;
+            align-self: flex-start;
+        }
+        .input-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .input-container input, .input-container select {
+            flex-grow: 1;
+            margin-right: 10px;
+            padding: 5px;
+        }
+        .input-container button {
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+<p>可能会比较慢，请耐心等待</p>
+<div class="chat-container">
+    <div class="messages" id="messages"></div>
+    <div class="input-container">
+        <select id="model">
+            <option value="Creative">Creative</option>
+            <option value="Balanced">Balanced</option>
+            <option value="Precise">Precise</option>
+        </select>
+        <input type="text" id="user-input" placeholder="快输入你的消息！">
+        <button id="send-button">Send</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    let conversation = [];
+
+    document.getElementById('send-button').addEventListener('click', () => {
+        const userInput = document.getElementById('user-input').value;
+        const selectedModel = document.getElementById('model').value;
+
+        if (userInput.trim() === '') return;
+
+        // Add user message to conversation
+        conversation.push({ role: 'user', content: userInput });
+        updateMessages();
+
+        // Clear the input field
+        document.getElementById('user-input').value = '';
+
+        // Call the API
+        axios.get(`https://api.alcex.cn/API/gpt-4/?model=${selectedModel}&messages=${JSON.stringify(conversation)}`)
+            .then(response => {
+                const assistantMessage = response.data.choices[0].message.content;
+
+                // Add assistant message to conversation
+                conversation.push({ role: 'assistant', content: assistantMessage });
+                updateMessages();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    });
+
+    function updateMessages() {
+        const messagesContainer = document.getElementById('messages');
+        messagesContainer.innerHTML = '';
+
+        conversation.forEach(msg => {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', msg.role);
+            messageDiv.textContent = msg.content;
+            messagesContainer.appendChild(messageDiv);
+        });
+
+        // Scroll to the bottom
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+</script>
+
+</body>
+</html>
