@@ -31,6 +31,19 @@
             max-width: 100%;
             border-radius: 8px;
         }
+        .download-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .download-btn:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
@@ -71,12 +84,14 @@
             `;
 
             if (data.type === '视频' && data.url) {
+                const videoUrl = data.url.replace('https://', 'http://');
                 resultDiv.innerHTML += `
                     <div class="video-container">
                         <video controls>
-                            <source src="${data.url}" type="video/mp4">
+                            <source src="${videoUrl}" type="video/mp4">
                             您的浏览器不支持视频播放。
                         </video>
+                        <button class="download-btn" onclick="downloadVideo('${videoUrl}')">下载视频</button>
                     </div>
                 `;
             } else if (data.type === '图文' && data.images) {
@@ -86,6 +101,15 @@
                     </div>
                 `;
             }
+        }
+
+        function downloadVideo(videoUrl) {
+            const a = document.createElement('a');
+            a.href = videoUrl;
+            a.download = 'video.mp4';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
     </script>
 </body>
