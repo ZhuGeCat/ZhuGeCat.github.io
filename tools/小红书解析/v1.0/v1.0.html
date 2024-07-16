@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>链接解析器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        #container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        .image-container img, .video-container video {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>链接解析器</h1>
+        <input type="text" id="urlInput" placeholder="请输入链接">
+        <button onclick="parseLink()">解析链接</button>
+        <div id="result"></div>
+    </div>
+    <script>
+        function parseLink() {
+            const url = document.getElementById('urlInput').value;
+            fetch(`https://api.mu-jie.cc/xhs?url=${encodeURIComponent(url)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        displayResult(data.data);
+                    } else {
+                        alert('解析失败: ' + data.msg);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('请求失败，请稍后重试');
+                });
+        }
+
+        function displayResult(data) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `
+                <h2>${data.title}</h2>
+                <p>作者: ${data.author}</p>
+                <p>点赞: ${data.like}</p>
+                <p>时间: ${new Date(data.time * 1000).toLocaleString()}</p>
+                <div>
+                    <img src="${data.cover.replace('https://', 'http://')}" alt="封面">
+                </div>
+            `;
+
+            if (data.type === '视频' && data.url) {
+                resultDiv.innerHTML += `
+                    <div class="video-container">
+                        <video controls>
+                            <source src="${data.url}" type="video/mp4">
+                            您的浏览器不支持视频播放。
+                        </video>
+                    </div>
+                `;
+            } else if (data.type === '图文' && data.images) {
+                resultDiv.innerHTML += `
+                    <div class="image-container">
+                        ${data.images.map(img => `<img src="${img.replace('https://', 'http://')}" alt="图片">`).join('')}
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
