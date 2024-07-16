@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>你已经存活了</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 100%;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        p {
+            margin: 5px 0 15px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        .input-group label {
+            margin-right: 10px;
+            display: inline-block;
+            width: 50px;
+        }
+        .input-group input {
+            width: calc(100% - 60px);
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            font-size: 14px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background: #6a11cb;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #2575fc;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>你已经存活了...</h1>
+    <p>输入生日</p>
+    <div class="input-group">
+        <label for="year">年:</label>
+        <input type="number" id="year" required>
+    </div>
+    <div class="input-group">
+        <label for="month">月:</label>
+        <input type="number" id="month" required>
+    </div>
+    <div class="input-group">
+        <label for="day">日:</label>
+        <input type="number" id="day" required>
+    </div>
+    <div class="input-group">
+        <label for="hour">时:</label>
+        <input type="number" id="hour" required>
+    </div>
+    <div class="input-group">
+        <label for="minute">分:</label>
+        <input type="number" id="minute" required>
+    </div>
+    <div class="input-group">
+        <label for="second">秒:</label>
+        <input type="number" id="second" required>
+    </div>
+    <button id="calculate-button">计算！</button>
+    <div class="result" id="result"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    document.getElementById('calculate-button').addEventListener('click', () => {
+        const year = document.getElementById('year').value;
+        const month = document.getElementById('month').value;
+        const day = document.getElementById('day').value;
+        const hour = document.getElementById('hour').value;
+        const minute = document.getElementById('minute').value;
+        const second = document.getElementById('second').value;
+
+        if (!year || !month || !day || !hour || !minute || !second) {
+            alert('请填写所有字段');
+            return;
+        }
+
+        const birthDate = new Date(year, month - 1, day, hour, minute, second);
+        const birthTimestamp = Math.floor(birthDate.getTime() / 1000);
+        const currentTimestamp = Math.floor(Date.now() / 1000);
+
+        const url = `https://api.mg-tool.cn/v1/calculate_time_diff.php?times=${birthTimestamp},${currentTimestamp}`;
+
+        axios.get(url)
+            .then(response => {
+                const data = response.data;
+                document.getElementById('result').innerHTML = `
+                    <p>你一共存活了：${data.time_diffs[0]} 秒</p>
+                    <p>也就是 ${data.year_diffs[0]} 年 ${data.month_diffs[0]} 个月 ${data.day_diffs[0]} 天 ${data.hour_diffs[0]} 小时 ${data.minute_diffs[0]} 分钟 ${data.second_diffs[0]} 秒</p>
+                `;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    });
+</script>
+
+</body>
+</html>
