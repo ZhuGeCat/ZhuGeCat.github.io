@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>酷炫贪吃蛇游戏</title>
+    <title>贪吃蛇游戏</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
@@ -282,6 +282,7 @@
                         <option value="multi">双人</option>
                         <option value="monster">怪物模式</option>
                         <option value="auto">全自动</option>
+                        <option value="playerVsAI">玩家 vs 电脑</option>
                     </select>
                 </div>
             </div>
@@ -345,11 +346,13 @@
         }
 
         function updateGame() {
-            if (gameMode === 'auto') {
-                autoMoveSnake(snake1);
-            } else {
-                moveSnake(snake1, direction1);
+            if (gameMode === 'auto' || gameMode === 'playerVsAI') {
+                autoMoveSnake(snake2); // 电脑控制第二条蛇
             }
+            if (gameMode !== 'auto') {
+                moveSnake(snake1, direction1); // 玩家控制第一条蛇
+            }
+
             if (gameMode === 'multi') {
                 moveSnake(snake2, direction2);
             }
@@ -359,7 +362,7 @@
                 return;
             }
 
-            if (checkFoodCollision(snake1)) {
+            if (gameMode !== 'auto' && checkFoodCollision(snake1)) {
                 snake1.push({ ...snake1[snake1.length - 1] });
                 if (food.length === 0) {
                     generateFood();
@@ -368,7 +371,7 @@
                 createExplosion(snake1[0], 'food'); // 添加这行，在蛇头位置创建食物爆炸效果
             }
 
-            if (gameMode === 'multi' && checkFoodCollision(snake2)) {
+            if (checkFoodCollision(snake2)) {
                 snake2.push({ ...snake2[snake2.length - 1] });
                 if (food.length === 0) {
                     generateFood();
@@ -385,9 +388,13 @@
 
             const direction = findDirection(head, target);
             if (direction) {
-                direction1 = direction;
+                if (snake === snake2) {
+                    direction2 = direction;
+                } else {
+                    direction1 = direction;
+                }
             }
-            moveSnake(snake, direction1);
+            moveSnake(snake, snake === snake2 ? direction2 : direction1);
         }
 
         function findDirection(start, end) {
@@ -421,7 +428,8 @@
                         next.x < boardSize &&
                         next.y >= 0 &&
                         next.y < boardSize &&
-                        !isOccupiedBySnake(next, snake1)
+                        !isOccupiedBySnake(next, snake1) &&
+                        !isOccupiedBySnake(next, snake2)
                     ) {
                         queue.push([next, [...path, dir]]);
                     }
@@ -440,52 +448,9 @@
             return false;
         }
 
-        function moveSnake(snake, direction) {
-            const newHead = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
-
-            // 边缘检测
-            if (newHead.x < 0) {
-                if (wallCollision) {
-                    gameOverMessage = `${snake === snake1 ? '绿色蛇' : '蓝色蛇'} 撞墙失败!`;
-                    endGame();
-                    return;
-                } else {
-                    newHead.x = boardSize - 1;
-                }
-            } else if (newHead.x >= boardSize) {
-                if (wallCollision) {
-                    gameOverMessage = `${snake === snake1 ? '绿色蛇' : '蓝色蛇'} 撞墙失败!`;
-                    endGame();
-                    return;
-                } else {
-                    newHead.x = 0;
-                }
-            }
-            if (newHead.y < 0) {
-                if (wallCollision) {
-                    gameOverMessage = `${snake === snake1 ? '绿色蛇' : '蓝色蛇'} 撞墙失败!`;
-                    endGame();
-                    return;
-                } else {
-                    newHead.y = boardSize - 1;
-                }
-            } else if (newHead.y >= boardSize) {
-                if (wallCollision) {
-                    gameOverMessage = `${snake === snake1 ? '绿色蛇' : '蓝色蛇'} 撞墙失败!`;
-                    endGame();
-                    return;
-                } else {
-                    newHead.y = 0;
-                }
-            }
-
-            snake.unshift(newHead);
-            snake.pop();
-        }
-
         function changeDirection(event) {
             const key = event.key;
-            if (gameMode === 'single' || gameMode === 'monster') {
+            if (gameMode === 'single' || gameMode === 'monster' || gameMode === 'playerVsAI') {
                 if ((key === 'ArrowUp' || key === 'w') && direction1.y === 0) direction1 = { x: 0, y: -1 };
                 else if ((key === 'ArrowDown' || key === 's') && direction1.y === 0) direction1 = { x: 0, y: 1 };
                 else if ((key === 'ArrowLeft' || key === 'a') && direction1.x === 0) direction1 = { x: -1, y: 0 };
@@ -501,6 +466,49 @@
                 else if ((key === 'ArrowLeft') && direction2.x === 0) direction2 = { x: -1, y: 0 };
                 else if ((key === 'ArrowRight') && direction2.x === 0) direction2 = { x: 1, y: 0 };
             }
+        }
+
+        function moveSnake(snake, direction) {
+            const newHead = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+
+            // 边缘检测
+            if (newHead.x < 0) {
+                if (wallCollision) {
+                    gameOverMessage = `${snake === snake1 ? '绿色蛇' : '蓝色蛇'} 撞到墙，失败!`;
+                    endGame();
+                    return;
+                } else {
+                    newHead.x = boardSize - 1;
+                }
+            } else if (newHead.x >= boardSize) {
+                if (wallCollision) {
+                    gameOverMessage = `${snake === snake1 ? '绿色蛇' : '蓝色蛇'} 撞到墙，失败!`;
+                    endGame();
+                    return;
+                } else {
+                    newHead.x = 0;
+                }
+            }
+            if (newHead.y < 0) {
+                if (wallCollision) {
+                    gameOverMessage = `${snake === snake1 ? '绿色蛇' : '蓝色蛇'} 撞到墙，失败!`;
+                    endGame();
+                    return;
+                } else {
+                    newHead.y = boardSize - 1;
+                }
+            } else if (newHead.y >= boardSize) {
+                if (wallCollision) {
+                    gameOverMessage = `${snake === snake1 ? '绿色蛇' : '蓝色蛇'} 撞到墙，失败!`;
+                    endGame();
+                    return;
+                } else {
+                    newHead.y = 0;
+                }
+            }
+
+            snake.unshift(newHead);
+            snake.pop();
         }
 
         function moveMonsters() {
@@ -542,15 +550,15 @@
             }
 
             for (let i = 1; i < snake2.length; i++) {
-                if (head2.x === snake2[i].x && head2.y === snake2[i].y) {
+                if (head2 && head2.x === snake2[i].x && head2.y === snake2[i].y) {
                     gameOverMessage = '蓝色蛇 撞到自己身体，失败！';
                     return true;
                 }
             }
 
-            if (gameMode === 'multi') {
+            if (gameMode === 'multi' || gameMode === 'playerVsAI') {
                 for (let i = 1; i < snake1.length; i++) {
-                    if (head2.x === snake1[i].x && head2.y === snake1[i].y) {
+                    if (head2 && head2.x === snake1[i].x && head2.y === snake1[i].y) {
                         gameOverMessage = '蓝色蛇 撞到绿色蛇的身体，蓝色蛇失败！';
                         return true;
                     }
@@ -608,7 +616,6 @@
             gameOverDisplay.style.display = 'none';
             gameOverMessage = '';
         }
-
 
         function generateFood() {
             food = [];
@@ -676,17 +683,19 @@
 
         function drawGame() {
             gameBoard.innerHTML = '';
-            snake1.forEach((segment, index) => {
-                const snakeElement = document.createElement('div');
-                snakeElement.style.gridRowStart = segment.y + 1;
-                snakeElement.style.gridColumnStart = segment.x + 1;
-                snakeElement.classList.add('snake');
-                if (index === 0) {
-                    snakeElement.classList.add('snake-head');
-                }
-                gameBoard.appendChild(snakeElement);
-            });
-            if (gameMode === 'multi') {
+            if (gameMode !== 'auto') {
+                snake1.forEach((segment, index) => {
+                    const snakeElement = document.createElement('div');
+                    snakeElement.style.gridRowStart = segment.y + 1;
+                    snakeElement.style.gridColumnStart = segment.x + 1;
+                    snakeElement.classList.add('snake');
+                    if (index === 0) {
+                        snakeElement.classList.add('snake-head');
+                    }
+                    gameBoard.appendChild(snakeElement);
+                });
+            }
+            if (gameMode === 'multi' || gameMode === 'playerVsAI' || gameMode === 'auto') {
                 snake2.forEach((segment, index) => {
                     const snakeElement = document.createElement('div');
                     snakeElement.style.gridRowStart = segment.y + 1;
