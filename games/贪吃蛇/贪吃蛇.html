@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>酷炫贪吃蛇游戏</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        @font-face {
+            font-family: "ZCOOLKuaile";
+            src: url("../../fonts/站酷仓耳渔阳体\ W05.TTF") format("truetype");
+        }
+
+        @font-face {
+            font-family: "YSHAOSHENTI";
+            src: url("../../fonts/优设好身体.TTF") format("truetype");
+        }
+
+        body {
+            font-family: 'YSHAOSHENTI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: #ecf0f1;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-family: 'ZCOOLKuaile', sans-serif;
+            font-size: 3rem;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
+        }
+
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        #game-board {
+            width: 500px;
+            height: 500px;
+            background-color: rgba(28, 40, 51, 0.8);
+            border: 3px solid #ecf0f1;
+            display: grid;
+            grid-template-rows: repeat(20, 1fr);
+            grid-template-columns: repeat(20, 1fr);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .snake {
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+            border-radius: 20%;
+            box-shadow: 0 0 5px rgba(46, 204, 113, 0.5);
+            z-index: 10;
+        }
+
+        .snake-head {
+            background: linear-gradient(to right, #27ae60, #1e8449);
+            border-radius: 30%;
+            box-shadow: 0 0 10px rgba(39, 174, 96, 0.7);
+        }
+
+        .snake-player2 {
+            background: linear-gradient(to right, #3498db, #2980b9);
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+
+        .snake-head-player2 {
+            background: linear-gradient(to right, #2980b9, #2471a3);
+            box-shadow: 0 0 10px rgba(41, 128, 185, 0.7);
+        }
+
+        .food {
+            background: radial-gradient(circle, #e74c3c, #c0392b);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.7);
+            z-index: 5;
+        }
+
+        .monster {
+            background: radial-gradient(circle, #f1c40f, #f39c12);
+            border-radius: 15%;
+            box-shadow: 0 0 10px rgba(241, 196, 15, 0.7);
+            z-index: 5;
+        }
+
+        #score {
+            font-family: 'YSHAOSHENTI', sans-serif;
+            font-size: 1.5rem;
+            margin-top: 20px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        #game-over {
+            font-family: 'YSHAOSHENTI', sans-serif;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.9);
+            color: #ecf0f1;
+            padding: 30px;
+            border-radius: 15px;
+            display: none;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            font-size: 1.5rem;
+            z-index: 20;
+        }
+
+        #controls {
+            font-family: 'YSHAOSHENTI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .control-item {
+            margin: 10px 0;
+            width: 100%;
+        }
+
+        #settings {
+            font-family: 'YSHAOSHENTI', sans-serif;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgba(28, 40, 51, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #ecf0f1;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #2980b9;
+            color: #ecf0f1;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-family: 'YSHAOSHENTI', sans-serif;
+        }
+
+        button:hover {
+            background-color: #3498db;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        label {
+            font-family: 'YSHAOSHENTI', sans-serif;
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        input[type="number"], input[type="checkbox"], select {
+            font-family: 'YSHAOSHENTI', sans-serif;
+            background-color: #34495e;
+            color: #ecf0f1;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 1rem;
+            width: 100%;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+
+        select {
+            font-family: 'YSHAOSHENTI', sans-serif;
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="%23ecf0f1" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+        }
+
+        @media (max-width: 600px) {
+            #game-board {
+                width: 300px;
+                height: 300px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            #score {
+                font-size: 1.2rem;
+                font-family: 'YSHAOSHENTI', sans-serif;
+            }
+
+            button {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+                font-family: 'YSHAOSHENTI', sans-serif;
+            }
+        }
+
+        /* 新增: 粒子效果 */
+        .particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 15;
+        }
+
+        @keyframes explode {
+            0% {
+                transform: translate(0, 0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty));
+                opacity: 0;
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>贪吃蛇游戏</h1>
+        <div id="controls">
+            <button id="settings-button" class="control-item">设置</button>
+            <div id="settings" class="control-item">
+                <div class="control-item">
+                    <label for="speed">速度 (毫秒): </label>
+                    <input type="number" id="speed" value="100" min="50" max="500">
+                </div>
+                <div class="control-item">
+                    <label for="foodCount">食物数量: </label>
+                    <input type="number" id="foodCount" value="1" min="1" max="5">
+                </div>
+                <div class="control-item">
+                    <label for="wallCollision">撞墙是否死亡: </label>
+                    <input type="checkbox" id="wallCollision">
+                </div>
+                <div class="control-item">
+                    <label for="gameMode">游戏模式: </label>
+                    <select id="gameMode">
+                        <option value="single">单人</option>
+                        <option value="multi">双人</option>
+                        <option value="monster">怪物模式</option>
+                        <option value="auto">全自动</option>
+                    </select>
+                </div>
+            </div>
+            <button id="startButton" class="control-item">开始游戏</button>
+        </div>
+        <div id="game-board"></div>
+        <div id="score">分数: 0</div>
+    </div>
+    <div id="game-over">游戏结束</div>
+    <script>
+        const gameBoard = document.getElementById('game-board');
+        const scoreDisplay = document.getElementById('score');
+        const gameOverDisplay = document.getElementById('game-over');
+        const startButton = document.getElementById('startButton');
+        const settingsButton = document.getElementById('settings-button');
+        const settingsDiv = document.getElementById('settings');
+        const speedInput = document.getElementById('speed');
+        const foodCountInput = document.getElementById('foodCount');
+        const wallCollisionInput = document.getElementById('wallCollision');
+        const gameModeInput = document.getElementById('gameMode');
+        const boardSize = 20;
+        const initialSnake1 = [{ x: 10, y: 10 }];
+        const initialSnake2 = [{ x: 15, y: 15 }];
+        let snake1 = [...initialSnake1];
+        let snake2 = [...initialSnake2];
+        let direction1 = { x: 0, y: 0 };
+        let direction2 = { x: 0, y: 0 };
+        let food = [];
+        let monsters = [];
+        let gameInterval;
+        let monsterInterval;
+        let score = 0;
+        let speed = 100;
+        let foodCount = 1;
+        let wallCollision = false;
+        let gameMode = 'single';
+        let gameOverMessage = '';
+
+        document.addEventListener('keydown', changeDirection);
+        startButton.addEventListener('click', startGame);
+        settingsButton.addEventListener('click', toggleSettings);
+
+        function toggleSettings() {
+            if (settingsDiv.style.display === 'none') {
+                settingsDiv.style.display = 'flex';
+            } else {
+                settingsDiv.style.display = 'none';
+            }
+        }
+
+        function startGame() {
+            speed = parseInt(speedInput.value);
+            foodCount = parseInt(foodCountInput.value);
+            wallCollision = wallCollisionInput.checked;
+            gameMode = gameModeInput.value;
+            resetGame();
+            gameInterval = setInterval(updateGame, speed);
+            if (gameMode === 'monster') {
+                monsterInterval = setInterval(moveMonsters, speed * 5); // 怪物速度变慢
+            }
+        }
+
+        function updateGame() {
+            if (gameMode === 'auto') {
+                autoMoveSnake(snake1);
+            } else {
+                moveSnake(snake1, direction1);
+            }
+            if (gameMode === 'multi') {
+                moveSnake(snake2, direction2);
+            }
+
+            if (isGameOver()) {
+                endGame();
+                return;
+            }
+
+            if (checkFoodCollision(snake1)) {
+                snake1.push({ ...snake1[snake1.length - 1] });
+                if (food.length === 0) {
+                    generateFood();
+                }
+                updateScore();
+                createExplosion(snake1[0], 'food'); // 添加这行，在蛇头位置创建食物爆炸效果
+            }
+
+            if (gameMode === 'multi' && checkFoodCollision(snake2)) {
+                snake2.push({ ...snake2[snake2.length - 1] });
+                if (food.length === 0) {
+                    generateFood();
+                }
+                createExplosion(snake2[0], 'food'); // 为第二条蛇也添加食物爆炸效果
+            }
+
+            drawGame();
+        }
+
+        function autoMoveSnake(snake) {
+            const head = snake[0];
+            const target = food[0];
+
+            const direction = findDirection(head, target);
+            if (direction) {
+                direction1 = direction;
+            }
+            moveSnake(snake, direction1);
+        }
+
+        function findDirection(start, end) {
+            const queue = [];
+            const visited = new Set();
+            queue.push([start, []]);
+
+            while (queue.length > 0) {
+                const [current, path] = queue.shift();
+                const key = `${current.x},${current.y}`;
+                if (visited.has(key)) continue;
+                visited.add(key);
+
+                if (current.x === end.x && current.y === end.y) {
+                    return path[0];
+                }
+
+                const directions = [
+                    { x: 0, y: -1, dir: { x: 0, y: -1 } }, // Up
+                    { x: 0, y: 1, dir: { x: 0, y: 1 } }, // Down
+                    { x: -1, y: 0, dir: { x: -1, y: 0 } }, // Left
+                    { x: 1, y: 0, dir: { x: 1, y: 0 } } // Right
+                ];
+
+                for (const { x, y, dir } of directions) {
+                    const next = { x: current.x + x, y: current.y + y };
+                    const nextKey = `${next.x},${next.y}`;
+                    if (
+                        !visited.has(nextKey) &&
+                        next.x >= 0 &&
+                        next.x < boardSize &&
+                        next.y >= 0 &&
+                        next.y < boardSize &&
+                        !isOccupiedBySnake(next, snake1)
+                    ) {
+                        queue.push([next, [...path, dir]]);
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        function isOccupiedBySnake(position, snake) {
+            for (const segment of snake) {
+                if (segment.x === position.x && segment.y === position.y) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function moveSnake(snake, direction) {
+            const newHead = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+
+            // 边缘检测
+            if (newHead.x < 0) {
+                if (wallCollision) {
+                    gameOverMessage = `${snake === snake1 ? '绿色蛇' : '蓝色蛇'} 撞墙失败!`;
+                    endGame();
+                    return;
+                } else {
+                    newHead.x = boardSize - 1;
+                }
+            } else if (newHead.x >= boardSize) {
+                if (wallCollision) {
+                    gameOverMessage = `${snake === snake1 ? '绿色蛇' : '蓝色蛇'} 撞墙失败!`;
+                    endGame();
+                    return;
+                } else {
+                    newHead.x = 0;
+                }
+            }
+            if (newHead.y < 0) {
+                if (wallCollision) {
+                    gameOverMessage = `${snake === snake1 ? '绿色蛇' : '蓝色蛇'} 撞墙失败!`;
+                    endGame();
+                    return;
+                } else {
+                    newHead.y = boardSize - 1;
+                }
+            } else if (newHead.y >= boardSize) {
+                if (wallCollision) {
+                    gameOverMessage = `${snake === snake1 ? '绿色蛇' : '蓝色蛇'} 撞墙失败!`;
+                    endGame();
+                    return;
+                } else {
+                    newHead.y = 0;
+                }
+            }
+
+            snake.unshift(newHead);
+            snake.pop();
+        }
+
+        function changeDirection(event) {
+            const key = event.key;
+            if (gameMode === 'single' || gameMode === 'monster') {
+                if ((key === 'ArrowUp' || key === 'w') && direction1.y === 0) direction1 = { x: 0, y: -1 };
+                else if ((key === 'ArrowDown' || key === 's') && direction1.y === 0) direction1 = { x: 0, y: 1 };
+                else if ((key === 'ArrowLeft' || key === 'a') && direction1.x === 0) direction1 = { x: -1, y: 0 };
+                else if ((key === 'ArrowRight' || key === 'd') && direction1.x === 0) direction1 = { x: 1, y: 0 };
+            } else if (gameMode === 'multi') {
+                if ((key === 'w') && direction1.y === 0) direction1 = { x: 0, y: -1 };
+                else if ((key === 's') && direction1.y === 0) direction1 = { x: 0, y: 1 };
+                else if ((key === 'a') && direction1.x === 0) direction1 = { x: -1, y: 0 };
+                else if ((key === 'd') && direction1.x === 0) direction1 = { x: 1, y: 0 };
+
+                if ((key === 'ArrowUp') && direction2.y === 0) direction2 = { x: 0, y: -1 };
+                else if ((key === 'ArrowDown') && direction2.y === 0) direction2 = { x: 0, y: 1 };
+                else if ((key === 'ArrowLeft') && direction2.x === 0) direction2 = { x: -1, y: 0 };
+                else if ((key === 'ArrowRight') && direction2.x === 0) direction2 = { x: 1, y: 0 };
+            }
+        }
+
+        function moveMonsters() {
+            monsters.forEach(monster => {
+                const directions = [
+                    { x: 0, y: -1 },
+                    { x: 0, y: 1 },
+                    { x: -1, y: 0 },
+                    { x: 1, y: 0 }
+                ];
+                const randomDirection = directions[Math.floor(Math.random() * directions.length)];
+                monster.x += randomDirection.x;
+                monster.y += randomDirection.y;
+
+                // 边缘检测
+                if (monster.x < 0) {
+                    monster.x = boardSize - 1;
+                } else if (monster.x >= boardSize) {
+                    monster.x = 0;
+                }
+                if (monster.y < 0) {
+                    monster.y = boardSize - 1;
+                } else if (monster.y >= boardSize) {
+                    monster.y = 0;
+                }
+            });
+        }
+
+        function isGameOver() {
+            const head1 = snake1[0];
+            const head2 = snake2[0];
+
+            for (let i = 1; i < snake1.length; i++) {
+                if (head1.x === snake1[i].x && head1.y === snake1[i].y) {
+                    gameOverMessage = '绿色蛇 撞到自己身体，失败！';
+                    createExplosion(head1, 'gameOver'); // 在蛇头位置创建游戏结束爆炸效果
+                    return true;
+                }
+            }
+
+            for (let i = 1; i < snake2.length; i++) {
+                if (head2.x === snake2[i].x && head2.y === snake2[i].y) {
+                    gameOverMessage = '蓝色蛇 撞到自己身体，失败！';
+                    return true;
+                }
+            }
+
+            if (gameMode === 'multi') {
+                for (let i = 1; i < snake1.length; i++) {
+                    if (head2.x === snake1[i].x && head2.y === snake1[i].y) {
+                        gameOverMessage = '蓝色蛇 撞到绿色蛇的身体，蓝色蛇失败！';
+                        return true;
+                    }
+                }
+
+                for (let i = 1; i < snake2.length; i++) {
+                    if (head1.x === snake2[i].x && head1.y === snake2[i].y) {
+                        gameOverMessage = '绿色蛇 撞到蓝色蛇的身体，绿色蛇失败！';
+                        return true;
+                    }
+                }
+
+                if (head1.x === head2.x && head1.y === head2.y) {
+                    gameOverMessage = '双方互相撞到，平局！';
+                    return true;
+                }
+            }
+
+            if (gameMode === 'monster') {
+                for (let monster of monsters) {
+                    if (head1.x === monster.x && head1.y === monster.y) {
+                        gameOverMessage = '绿色蛇 撞到怪物，失败！';
+                        createExplosion(head1, 'gameOver'); // 在蛇头位置创建游戏结束爆炸效果
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            if (gameMode === 'monster') {
+                clearInterval(monsterInterval);
+            }
+            gameOverDisplay.textContent = gameOverMessage;
+            gameOverDisplay.style.display = 'block';
+            gameBoard.classList.add('shake');
+        }
+
+        function resetGame() {
+            clearInterval(gameInterval);
+            if (gameMode === 'monster') {
+                clearInterval(monsterInterval);
+            }
+            snake1 = [...initialSnake1];
+            snake2 = [...initialSnake2];
+            direction1 = { x: 0, y: 0 };
+            direction2 = { x: 0, y: 0 };
+            score = 0;
+            scoreDisplay.textContent = '分数: ' + score;
+            generateFood();
+            generateMonsters();
+            gameOverDisplay.style.display = 'none';
+            gameOverMessage = '';
+        }
+
+
+        function generateFood() {
+            food = [];
+            for (let i = 0; i < foodCount; i++) {
+                let newFood;
+                do {
+                    newFood = {
+                        x: Math.floor(Math.random() * boardSize),
+                        y: Math.floor(Math.random() * boardSize)
+                    };
+                } while (isFoodOnSnake(newFood, snake1) || (gameMode === 'multi' && isFoodOnSnake(newFood, snake2)) || isFoodOnMonsters(newFood));
+                food.push(newFood);
+            }
+        }
+
+        function generateMonsters() {
+            if (gameMode === 'monster') {
+                monsters = [];
+                for (let i = 0; i < 5; i++) {  // 生成5个怪物
+                    let newMonster;
+                    do {
+                        newMonster = {
+                            x: Math.floor(Math.random() * boardSize),
+                            y: Math.floor(Math.random() * boardSize)
+                        };
+                    } while (isFoodOnSnake(newMonster, snake1) || isFoodOnSnake(newMonster, snake2) || isFoodOnMonsters(newMonster));
+                    monsters.push(newMonster);
+                }
+            }
+        }
+
+        function isFoodOnSnake(newFood, snake) {
+            for (const segment of snake) {
+                if (segment.x === newFood.x && segment.y === newFood.y) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function isFoodOnMonsters(newFood) {
+            for (const monster of monsters) {
+                if (monster.x === newFood.x && monster.y === newFood.y) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function checkFoodCollision(snake) {
+            const head = snake[0];
+            for (let i = 0; i < food.length; i++) {
+                if (head.x === food[i].x && head.y === food[i].y) {
+                    food.splice(i, 1);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function updateScore() {
+            score += 10;
+            scoreDisplay.textContent = '分数: ' + score;
+        }
+
+        function drawGame() {
+            gameBoard.innerHTML = '';
+            snake1.forEach((segment, index) => {
+                const snakeElement = document.createElement('div');
+                snakeElement.style.gridRowStart = segment.y + 1;
+                snakeElement.style.gridColumnStart = segment.x + 1;
+                snakeElement.classList.add('snake');
+                if (index === 0) {
+                    snakeElement.classList.add('snake-head');
+                }
+                gameBoard.appendChild(snakeElement);
+            });
+            if (gameMode === 'multi') {
+                snake2.forEach((segment, index) => {
+                    const snakeElement = document.createElement('div');
+                    snakeElement.style.gridRowStart = segment.y + 1;
+                    snakeElement.style.gridColumnStart = segment.x + 1;
+                    snakeElement.classList.add('snake', 'snake-player2');
+                    if (index === 0) {
+                        snakeElement.classList.add('snake-head', 'snake-head-player2');
+                    }
+                    gameBoard.appendChild(snakeElement);
+                });
+            }
+            food.forEach(f => {
+                const foodElement = document.createElement('div');
+                foodElement.style.gridRowStart = f.y + 1;
+                foodElement.style.gridColumnStart = f.x + 1;
+                foodElement.classList.add('food');
+                gameBoard.appendChild(foodElement);
+            });
+            if (gameMode === 'monster') {
+                monsters.forEach(m => {
+                    const monsterElement = document.createElement('div');
+                    monsterElement.style.gridRowStart = m.y + 1;
+                    monsterElement.style.gridColumnStart = m.x + 1;
+                    monsterElement.classList.add('monster');
+                    gameBoard.appendChild(monsterElement);
+                });
+            }
+        }
+
+        function createExplosion(position, type) {
+            const colors = type === 'food' ? ['#e74c3c', '#c0392b'] : ['#ecf0f1', '#bdc3c7'];
+            const particleCount = type === 'food' ? 50 : 100;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                const size = Math.random() * 6 + 3;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                const initialX = (position.x + 0.5) * (gameBoard.clientWidth / boardSize);
+                const initialY = (position.y + 0.5) * (gameBoard.clientHeight / boardSize);
+                
+                particle.style.left = `${initialX}px`;
+                particle.style.top = `${initialY}px`;
+                
+                const destinationX = (Math.random() - 0.5) * 2 * 50;
+                const destinationY = (Math.random() - 0.5) * 2 * 50;
+                particle.style.setProperty('--tx', `${destinationX}px`);
+                particle.style.setProperty('--ty', `${destinationY}px`);
+                
+                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                const animation = particle.animate(
+                    [
+                        { transform: 'translate(0, 0)', opacity: 1 },
+                        { transform: `translate(${destinationX}px, ${destinationY}px)`, opacity: 0 }
+                    ],
+                    {
+                        duration: Math.random() * 1000 + 500,
+                        easing: 'cubic-bezier(0, .9, .57, 1)',
+                        delay: Math.random() * 200
+                    }
+                );
+                
+                animation.onfinish = () => {
+                    particle.remove();
+                };
+                
+                gameBoard.appendChild(particle);
+            }
+        }
+    </script>
+</body>
+</html>
