@@ -6,7 +6,6 @@
     <title>俄罗斯方块</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
-
         :root {
             --primary-color: #6d5c53;
             --secondary-color: #a5978b;
@@ -14,7 +13,6 @@
             --game-background: #f9f1ec;
             --border-color: #d1b6a8;
         }
-
         body {
             font-family: 'Poppins', sans-serif;
             display: flex;
@@ -25,7 +23,6 @@
             background-color: var(--background-color);
             color: var(--primary-color);
         }
-
         .game-container {
             display: flex;
             flex-direction: row;
@@ -36,31 +33,26 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
         }
-
         .game-container:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 35px rgba(0,0,0,0.15);
         }
-
         .game-area {
             position: relative;
             width: 300px;
             height: 600px;
         }
-
         #tetris {
             border: 3px solid var(--border-color);
             border-radius: 10px;
             transition: all 0.3s ease;
         }
-
         .sidebar {
             display: flex;
             flex-direction: column;
             align-items: center;
             margin-left: 20px;
         }
-
         #nextPiece {
             background-color: var(--game-background);
             border: 3px solid var(--border-color);
@@ -68,7 +60,6 @@
             margin-bottom: 20px;
             transition: all 0.3s ease;
         }
-
         .controls {
             display: flex;
             gap: 15px;
@@ -76,7 +67,6 @@
             flex-direction: column;
             align-items: center;
         }
-
         button {
             padding: 12px 25px;
             font-size: 16px;
@@ -92,24 +82,20 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-
         button:hover {
             background-color: var(--primary-color);
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
-
         button:active {
             transform: translateY(1px);
         }
-
         .score {
             font-size: 28px;
             color: var(--primary-color);
             margin-bottom: 20px;
             font-weight: 600;
         }
-
         .modal {
             display: none;    
             position: fixed;
@@ -122,12 +108,10 @@
             background-color: rgba(0,0,0,0.4);
             animation: fadeIn 0.3s ease;
         }
-
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-
         .modal-content {
             background-color: var(--game-background);
             margin: 15% auto;
@@ -138,22 +122,18 @@
             text-align: center;
             animation: slideIn 0.3s ease;
         }
-
         @keyframes slideIn {
             from { transform: translateY(-50px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
-
         .setting-item {
             margin-bottom: 15px;
         }
-
         .setting-item label {
             display: block;
             margin-bottom: 5px;
             font-weight: 600;
         }
-
         .setting-item input[type="range"] {
             width: 100%;
             -webkit-appearance: none;
@@ -164,11 +144,9 @@
             opacity: 0.7;
             transition: opacity 0.2s;
         }
-
         .setting-item input[type="range"]:hover {
             opacity: 1;
         }
-
         .setting-item input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
@@ -178,7 +156,6 @@
             background: var(--primary-color);
             cursor: pointer;
         }
-
         .setting-item input[type="range"]::-moz-range-thumb {
             width: 20px;
             height: 20px;
@@ -186,11 +163,9 @@
             background: var(--primary-color);
             cursor: pointer;
         }
-
         #closeSettings {
             margin-top: 15px;
         }
-
         .game-over-modal {
             display: none;
             position: fixed;
@@ -205,38 +180,31 @@
             color: var(--game-background);
             animation: zoomIn 0.3s ease;
         }
-
         @keyframes zoomIn {
             from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
             to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
         }
-
         .game-over-modal h2 {
             margin: 0 0 20px 0;
             font-size: 36px;
         }
-
         .game-over-modal button {
             margin-top: 15px;
         }
-
         @media (max-width: 768px) {
             .game-container {
                 flex-direction: column;
                 align-items: center;
             }
-
             .sidebar {
                 margin-left: 0;
                 margin-top: 20px;
             }
         }
-
         @keyframes fadeOut {
             from { opacity: 1; transform: scale(1); }
             to { opacity: 0; transform: scale(0.5); }
         }
-
         .clear-row {
             animation: fadeOut 0.5s ease-out forwards;
         }
@@ -266,6 +234,14 @@
                 <input type="range" id="speed" min="1" max="10" value="5">
             </div>
             <div class="setting-item">
+                <label for="aiMode">AI 模式:</label>
+                <input type="checkbox" id="aiMode">
+            </div>
+            <div class="setting-item">
+                <label for="aiSpeed">AI 速度:</label>
+                <input type="range" id="aiSpeed" min="1" max="10" value="5">
+            </div>
+            <div class="setting-item">
                 <label for="ghostPiece">幽灵方块:</label>
                 <input type="checkbox" id="ghostPiece">
             </div>
@@ -288,7 +264,6 @@
         const nextPieceContext = nextPieceCanvas.getContext('2d');
         const grid = 30;
         const tetrominoSequence = [];
-
         const playfield = [];
         for (let row = -2; row < 20; row++) {
             playfield[row] = [];
@@ -296,7 +271,6 @@
                 playfield[row][col] = 0;
             }
         }
-
         const tetrominos = {
             'I': [[0,0,0,0], [1,1,1,1], [0,0,0,0], [0,0,0,0]],
             'J': [[1,0,0], [1,1,1], [0,0,0]],
@@ -306,7 +280,6 @@
             'Z': [[1,1,0], [0,1,1], [0,0,0]],
             'T': [[0,1,0], [1,1,1], [0,0,0]]
         };
-
         const colors = {
             'I': '#a5b8c1',
             'O': '#e3c9c9',
@@ -316,7 +289,6 @@
             'J': '#b1c5c0',
             'L': '#d4c1a8'
         };
-
         let count = 0;
         let tetromino = getNextTetromino();
         let nextTetromino = getNextTetromino();
@@ -325,7 +297,9 @@
         let score = 0;
         let speed = 5;
         let ghostPieceEnabled = false;
-
+        let aiModeEnabled = false;
+        let aiSpeed = 5;
+        let aiCounter = 0;
         const scoreElement = document.getElementById('score');
         const startBtn = document.getElementById('startBtn');
         const pauseBtn = document.getElementById('pauseBtn');
@@ -335,14 +309,13 @@
         const gameOverModal = document.getElementById('gameOverModal');
         const restartBtn = document.getElementById('restartBtn');
         const speedInput = document.getElementById('speed');
+        const aiModeInput = document.getElementById('aiMode');
+        const aiSpeedInput = document.getElementById('aiSpeed');
         const ghostPieceInput = document.getElementById('ghostPiece');
-
         restartBtn.addEventListener('click', restartGame);
-
         function getRandomInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
-
         function generateSequence() {
             const sequence = ['I', 'J', 'L', 'O', 'S', 'T', 'Z'];
             while (sequence.length) {
@@ -351,7 +324,6 @@
                 tetrominoSequence.push(name);
             }
         }
-
         function getNextTetromino() {
             if (tetrominoSequence.length === 0) {
                 generateSequence();
@@ -367,7 +339,6 @@
                 col: col
             };
         }
-
         function rotate(matrix) {
             const N = matrix.length;
             const result = matrix.map((row, i) =>
@@ -375,7 +346,6 @@
             );
             return result;
         }
-
         function isValidMove(matrix, cellRow, cellCol) {
             for (let row = 0; row < matrix.length; row++) {
                 for (let col = 0; col < matrix[row].length; col++) {
@@ -391,7 +361,6 @@
             }
             return true;
         }
-
         function placeTetromino() {
             for (let row = 0; row < tetromino.matrix.length; row++) {
                 for (let col = 0; col < tetromino.matrix[row].length; col++) {
@@ -403,7 +372,6 @@
                     }
                 }
             }
-
             let clearedRows = 0;
             for (let row = playfield.length - 1; row >= 0; ) {
                 if (playfield[row].every(cell => !!cell)) {
@@ -414,7 +382,6 @@
                     row--;
                 }
             }
-
             if (clearedRows > 0) {
                 score += (clearedRows <= 2 ? clearedRows * 10 : clearedRows * 20);
                 scoreElement.textContent = score;
@@ -422,12 +389,10 @@
                     animateRowClear(clearedRows);
                 }
             }
-
             tetromino = nextTetromino;
             nextTetromino = getNextTetromino();
             drawNextPiece();
         }
-
         function animateRowClear(clearedRows) {
             const originalAlpha = context.globalAlpha;
             let alpha = 1.0;
@@ -446,7 +411,6 @@
                 }
                 alpha -= 0.05;
                 scale += 0.05;
-
                 if (alpha > 0) {
                     requestAnimationFrame(explode);
                 } else {
@@ -456,35 +420,28 @@
             }
             explode();
         }
-
         function shakeBoard() {
             let amplitude = 5;
-            let duration = 500; // ms
+            let duration = 500; 
             let startTime = Date.now();
-            
             function shake() {
                 let elapsed = Date.now() - startTime;
                 let remaining = duration - elapsed;
-                
                 if (remaining > 0) {
                     let phase = elapsed / duration * Math.PI;
                     let dx = amplitude * Math.sin(phase * 10);
-                    
                     context.clearRect(0, 0, canvas.width, canvas.height);
                     context.save();
                     context.translate(dx, 0);
                     drawBoard();
                     context.restore();
-                    
                     requestAnimationFrame(shake);
                 } else {
                     drawBoard();
                 }
             }
-            
             shake();
         }
-
         function drawBoard() {
             for (let row = 0; row < 20; row++) {
                 for (let col = 0; col < 10; col++) {
@@ -499,7 +456,6 @@
                     }
                 }
             }
-            
             if (tetromino) {
                 context.fillStyle = colors[tetromino.name];
                 for (let row = 0; row < tetromino.matrix.length; row++) {
@@ -515,7 +471,6 @@
                 }
             }
         }
-
         function showGameOver() {
             cancelAnimationFrame(rAF);
             gameOver = true;
@@ -527,7 +482,6 @@
             highScoreElement.textContent = highScore;
             gameOverModal.style.display = 'block';
         }
-
         function drawNextPiece() {
             nextPieceContext.clearRect(0, 0, nextPieceCanvas.width, nextPieceCanvas.height);
             nextPieceContext.fillStyle = colors[nextTetromino.name];
@@ -543,14 +497,11 @@
                 }
             }
         }
-
         function loop() {
             rAF = requestAnimationFrame(loop);
             context.clearRect(0, 0, canvas.width, canvas.height);
-
             drawNextPiece();
             drawBoard();
-
             if (tetromino) {
                 if (++count > speed * 10) {
                     tetromino.row++;
@@ -560,7 +511,6 @@
                         placeTetromino();
                     }
                 }
-
                 if (ghostPieceEnabled) {
                     const ghostPiece = {...tetromino};
                     while (isValidMove(ghostPiece.matrix, ghostPiece.row + 1, ghostPiece.col)) {
@@ -577,29 +527,28 @@
                         }
                     }
                 }
+                if (aiModeEnabled && ++aiCounter > aiSpeed * 10) {
+                    aiPlay();
+                    aiCounter = 0;
+                }
             }
         }
-
         document.addEventListener('keydown', function(e) {
-            if (gameOver) return;
-
+            if (gameOver || aiModeEnabled) return;
             if (e.which === 37 || e.which === 39 || e.key === 'a' || e.key === 'A' || e.key === 'd' || e.key === 'D') {
                 const col = e.which === 37 || e.key === 'a' || e.key === 'A'
                     ? tetromino.col - 1
                     : tetromino.col + 1;
-
                 if (isValidMove(tetromino.matrix, tetromino.row, col)) {
                     tetromino.col = col;
                 }
             }
-
             if (e.which === 38 || e.key === 'w' || e.key === 'W') {
                 const matrix = rotate(tetromino.matrix);
                 if (isValidMove(matrix, tetromino.row, tetromino.col)) {
                     tetromino.matrix = matrix;
                 }
             }
-
             if(e.which === 40 || e.key === 's' || e.key === 'S') {
                 const row = tetromino.row + 1;
                 if (!isValidMove(tetromino.matrix, row, tetromino.col)) {
@@ -609,7 +558,6 @@
                 }
                 tetromino.row = row;
             }
-
             if (e.key === ' ') {
                 while (isValidMove(tetromino.matrix, tetromino.row + 1, tetromino.col)) {
                     tetromino.row++;
@@ -619,7 +567,6 @@
                 }
             }
         });
-
         function restartGame() {
             playfield.forEach(row => row.fill(0));
             score = 0;
@@ -632,10 +579,8 @@
             rAF = requestAnimationFrame(loop);
             startBtn.disabled = true;
             pauseBtn.disabled = false;
-            speed = 5; // 重置速度为初始速度
+            speed = 5; 
         }
-
-        // 在 startBtn 的事件监听器中调用 restartGame
         startBtn.addEventListener('click', function() {
             if (gameOver) {
                 restartGame();
@@ -645,7 +590,6 @@
                 pauseBtn.disabled = false;
             }
         });
-
         pauseBtn.addEventListener('click', function() {
             if (rAF) {
                 cancelAnimationFrame(rAF);
@@ -654,15 +598,12 @@
                 pauseBtn.disabled = true;
             }
         });
-
         settingsBtn.addEventListener('click', () => {
             settingsModal.style.display = 'block';
         });
-
         closeSettings.addEventListener('click', () => {
             settingsModal.style.display = 'none';
         });
-
         restartBtn.addEventListener('click', () => {
             playfield.forEach(row => row.fill(0));
             score = 0;
@@ -673,94 +614,120 @@
             startBtn.disabled = true;
             pauseBtn.disabled = false;
         });
-
         speedInput.addEventListener('change', (e) => {
             speed = 11 - e.target.value;
         });
-
+        aiModeInput.addEventListener('change', (e) => {
+            aiModeEnabled = e.target.checked;
+        });
+        aiSpeedInput.addEventListener('change', (e) => {
+            aiSpeed = 11 - e.target.value;
+        });
         ghostPieceInput.addEventListener('change', (e) => {
             ghostPieceEnabled = e.target.checked;
         });
-
-        function animateRowClear(clearedRows) {
-            const originalAlpha = context.globalAlpha;
-            let alpha = 1.0;
-            let scale = 1.0;
-            
-            for (let i = 0; i < clearedRows; i++) {
-                for (let col = 0; col < 10; col++) {
-                    const row = playfield.length - 1 - i;
-                    playfield[row][col] = 'clear';
+        function aiPlay() {
+            if (!tetromino) return;
+            let bestMove = null;
+            let bestScore = -Infinity;
+            const originalMatrix = tetromino.matrix;
+            const originalCol = tetromino.col;
+            const originalRow = tetromino.row;
+            for (let rotation = 0; rotation < 4; rotation++) {
+                if (rotation > 0) {
+                    tetromino.matrix = rotate(tetromino.matrix);
                 }
-            }
-            
-            function explode() {
-                context.globalAlpha = alpha;
-                context.fillStyle = '#ffffff';
-                for (let i = 0; i < clearedRows; i++) {
-                    const row = playfield.length - 1 - i;
-                    for (let col = 0; col < 10; col++) {
-                        context.save();
-                        context.translate(col * grid + grid / 2, row * grid + grid / 2);
-                        context.scale(scale, scale);
-                        context.fillRect(-grid / 2, -grid / 2, grid - 1, grid - 1);
-                        context.restore();
+                for (let col = -2; col < 10; col++) {
+                    tetromino.col = col;
+                    tetromino.row = originalRow;
+                    if (!isValidMove(tetromino.matrix, tetromino.row, tetromino.col)) {
+                        continue;
+                    }
+                    while (isValidMove(tetromino.matrix, tetromino.row + 1, tetromino.col)) {
+                        tetromino.row++;
+                    }
+                    const moveScore = evaluateBoard(tetromino);
+                    if (moveScore > bestScore) {
+                        bestScore = moveScore;
+                        bestMove = {
+                            matrix: tetromino.matrix,
+                            col: tetromino.col,
+                            row: tetromino.row
+                        };
                     }
                 }
-                alpha -= 0.05;
-                scale += 0.05;
-
-                if (alpha > 0) {
-                    requestAnimationFrame(explode);
-                } else {
-                    context.globalAlpha = originalAlpha;
-                    shakeBoard();
-                    clearClearedRows(clearedRows);
+            }
+            if (bestMove) {
+                tetromino.matrix = bestMove.matrix;
+                tetromino.col = bestMove.col;
+                tetromino.row = bestMove.row;
+                placeTetromino();
+            } else {
+                tetromino.matrix = originalMatrix;
+                tetromino.col = originalCol;
+                tetromino.row = originalRow;
+            }
+        }
+        function evaluateBoard(tetromino) {
+            const testPlayfield = playfield.map(row => row.slice());
+            for (let row = 0; row < tetromino.matrix.length; row++) {
+                for (let col = 0; col < tetromino.matrix[row].length; col++) {
+                    if (tetromino.matrix[row][col]) {
+                        testPlayfield[tetromino.row + row][tetromino.col + col] = tetromino.name;
+                    }
                 }
             }
-            explode();
-        }
-
-        function clearClearedRows(clearedRows) {
-            for (let i = 0; i < clearedRows; i++) {
-                playfield.pop();
-                playfield.unshift(new Array(10).fill(0));
-            }
-            drawBoard();
-        }
-
-        function drawBoard() {
+            let score = 0;
+            let rowsCleared = 0;
             for (let row = 0; row < 20; row++) {
-                for (let col = 0; col < 10; col++) {
-                    if (playfield[row][col]) {
-                        const name = playfield[row][col];
-                        if (name === 'clear') continue;
-                        context.fillStyle = colors[name];
-                        context.beginPath();
-                        context.roundRect(col * grid, row * grid, grid - 1, grid - 1, 3);
-                        context.fill();
-                        context.strokeStyle = '#f9f1ec';
-                        context.stroke();
-                    }
+                if (testPlayfield[row].every(cell => !!cell)) {
+                    rowsCleared++;
                 }
             }
-            
-            if (tetromino) {
-                context.fillStyle = colors[tetromino.name];
-                for (let row = 0; row < tetromino.matrix.length; row++) {
-                    for (let col = 0; col < tetromino.matrix[row].length; col++) {
-                        if (tetromino.matrix[row][col]) {
-                            context.beginPath();
-                            context.roundRect((tetromino.col + col) * grid, (tetromino.row + row) * grid, grid - 1, grid - 1, 3);
-                            context.fill();
-                            context.strokeStyle = '#f9f1ec';
-                            context.stroke();
-                        }
-                    }
-                }
-            }
+            score += rowsCleared * 100;
+            const holes = countHoles(testPlayfield);
+            score -= holes * 20;
+            score -= getMaxHeight(testPlayfield) * 5;
+            score -= getBumpiness(testPlayfield) * 2;
+            return score;
         }
-
+        function countHoles(testPlayfield) {
+            let holes = 0;
+            for (let col = 0; col < 10; col++) {
+                let blockFound = false;
+                for (let row = 0; row < 20; row++) {
+                    if (testPlayfield[row][col]) {
+                        blockFound = true;
+                    } else if (blockFound) {
+                        holes++;
+                    }
+                }
+            }
+            return holes;
+        }
+        function getMaxHeight(testPlayfield) {
+            for (let row = 0; row < 20; row++) {
+                if (testPlayfield[row].some(cell => !!cell)) {
+                    return 20 - row;
+                }
+            }
+            return 0;
+        }
+        function getBumpiness(testPlayfield) {
+            let bumpiness = 0;
+            for (let col = 0; col < 9; col++) {
+                bumpiness += Math.abs(getColumnHeight(col, testPlayfield) - getColumnHeight(col + 1, testPlayfield));
+            }
+            return bumpiness;
+        }
+        function getColumnHeight(col, testPlayfield) {
+            for (let row = 0; row < 20; row++) {
+                if (testPlayfield[row][col]) {
+                    return 20 - row;
+                }
+            }
+            return 0;
+        }
         highScoreElement.textContent = highScore;
     </script>
 </body>
