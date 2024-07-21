@@ -9,6 +9,127 @@ document.addEventListener('DOMContentLoaded', () => {
     let grid = Array(4).fill(null).map(() => Array(4).fill(0));
     let score = 0;
 
+    const aiToggle = document.getElementById('ai-toggle');
+    const aiSpeedSlider = document.getElementById('ai-speed');
+    const speedValue = document.getElementById('speed-value');
+    const aiMoveDisplay = document.getElementById('ai-move');
+    const aiModeButton = document.getElementById('ai-mode-button');
+    const aiModal = document.getElementById('ai-modal');
+    const closeModal = document.querySelector('.close');
+    let aiMode = false;
+    let aiSpeed = 300;
+
+    aiModeButton.addEventListener('click', () => {
+        aiModal.style.display = 'block';
+    });
+
+    closeModal.addEventListener('click', () => {
+        aiModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+        if (event.target == aiModal) {
+            aiModal.style.display = 'none';
+        }
+    });
+
+    aiToggle.addEventListener('change', () => {
+        aiMode = aiToggle.checked;
+        if (aiMode) {
+            makeAIMove();
+        }
+    });
+
+    aiSpeedSlider.addEventListener('input', () => {
+        aiSpeed = aiSpeedSlider.value;
+        speedValue.textContent = `${aiSpeed}ms`;
+    });
+
+    function makeAIMove() {
+        if (!aiMode) return;
+
+        // 简单的 AI 逻辑：尝试所有可能的移动,选择得分最高的
+        const moves = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+        let bestScore = -1;
+        let bestMove = null;
+
+        for (const move of moves) {
+            const tempGrid = JSON.parse(JSON.stringify(grid));
+            const tempScore = score;
+
+            let moved = false;
+            switch (move) {
+                case 'ArrowLeft':
+                    moved = moveLeft();
+                    break;
+                case 'ArrowRight':
+                    moved = moveRight();
+                    break;
+                case 'ArrowUp':
+                    moved = moveUp();
+                    break;
+                case 'ArrowDown':
+                    moved = moveDown();
+                    break;
+            }
+
+            if (moved) {
+                const currentScore = evaluatePosition();
+                if (currentScore > bestScore) {
+                    bestScore = currentScore;
+                    bestMove = move;
+                }
+            }
+
+            // 恢复原始状态
+            grid = tempGrid;
+            score = tempScore;
+        }
+
+        if (bestMove) {
+            let moved = false;
+            switch (bestMove) {
+                case 'ArrowLeft':
+                    moved = moveLeft();
+                    aiMoveDisplay.textContent = 'AI当前操作: ←';
+                    break;
+                case 'ArrowRight':
+                    moved = moveRight();
+                    aiMoveDisplay.textContent = 'AI当前操作: →';
+                    break;
+                case 'ArrowUp':
+                    moved = moveUp();
+                    aiMoveDisplay.textContent = 'AI当前操作: ↑';
+                    break;
+                case 'ArrowDown':
+                    moved = moveDown();
+                    aiMoveDisplay.textContent = 'AI当前操作: ↓';
+                    break;
+            }
+            if (moved) {
+                addNewTile();
+                renderBoard();
+                checkGameOver();
+            }
+        }
+
+        // 继续进行 AI 移动
+        setTimeout(makeAIMove, aiSpeed);
+    }
+
+    function evaluatePosition() {
+        // 简单的评估函数:空格数量 + 得分
+        let emptyTiles = 0;
+        for (let r = 0; r < 4; r++) {
+            for (let c = 0; c < 4; c++) {
+                if (grid[r][c] === 0) {
+                    emptyTiles++;
+                }
+            }
+        }
+        return emptyTiles * 10 + score;
+    }
+
     function initialize() {
         resetGame();
         addNewTile(true);
@@ -18,6 +139,9 @@ document.addEventListener('DOMContentLoaded', () => {
             adjustForMobile();
             showSwipeGuide();
         }
+        aiMode = false;
+        aiToggle.checked = false;
+        aiMoveDisplay.textContent = 'AI当前操作: -';
     }
 
     function resetGame() {
@@ -84,38 +208,61 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function moveLeft() {
+        let moved = false;
         for (let r = 0; r < 4; r++) {
-            grid[r] = slideAndCombine(grid[r]);
+            let newRow = slideAndCombine(grid[r]);
+            if (newRow.join(',') !== grid[r].join(',')) {
+                moved = true;
+            }
+            grid[r] = newRow;
         }
+        return moved;
     }
 
     function moveRight() {
+        let moved = false;
         for (let r = 0; r < 4; r++) {
-            grid[r] = slideAndCombine(grid[r].reverse()).reverse();
+            let newRow = slideAndCombine(grid[r].reverse()).reverse();
+            if (newRow.join(',') !== grid[r].join(',')) {
+                moved = true;
+            }
+            grid[r] = newRow;
         }
+        return moved;
     }
 
     function moveUp() {
+        let moved = false;
         for (let c = 0; c < 4; c++) {
             let col = [grid[0][c], grid[1][c], grid[2][c], grid[3][c]];
-            col = slideAndCombine(col);
+            let newCol = slideAndCombine(col);
+            if (newCol.join(',') !== col.join(',')) {
+                moved = true;
+            }
             for (let r = 0; r < 4; r++) {
-                grid[r][c] = col[r];
+                grid[r][c] = newCol[r];
             }
         }
+        return moved;
     }
 
     function moveDown() {
+        let moved = false;
         for (let c = 0; c < 4; c++) {
             let col = [grid[0][c], grid[1][c], grid[2][c], grid[3][c]];
-            col = slideAndCombine(col.reverse()).reverse();
+            let newCol = slideAndCombine(col.reverse()).reverse();
+            if (newCol.join(',') !== col.join(',')) {
+                moved = true;
+            }
             for (let r = 0; r < 4; r++) {
-                grid[r][c] = col[r];
+                grid[r][c] = newCol[r];
             }
         }
+        return moved;
     }
 
     function handleKeyPress(event) {
+        if (aiMode) return;
         switch (event.key) {
             case 'ArrowLeft':
                 moveLeft();
