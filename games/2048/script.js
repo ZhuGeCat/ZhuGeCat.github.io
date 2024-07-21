@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameOverOverlay = document.getElementById('game-over');
     const restartButton = document.getElementById('restart-button');
     const tryAgainButton = document.getElementById('try-again-button');
+    const swipeGuide = document.getElementById('swipe-guide');
     let tiles = Array.from(board.getElementsByClassName('tile'));
     let grid = Array(4).fill(null).map(() => Array(4).fill(0));
     let score = 0;
@@ -13,12 +14,17 @@ document.addEventListener('DOMContentLoaded', () => {
         addNewTile(true);
         addNewTile(true);
         renderBoard();
+        if (isMobileDevice()) {
+            adjustForMobile();
+            showSwipeGuide();
+        }
     }
 
     function resetGame() {
         grid = Array(4).fill(null).map(() => Array(4).fill(0));
         score = 0;
         gameOverOverlay.classList.remove('visible');
+        swipeGuide.classList.remove('visible');
     }
 
     function addNewTile(initial = false) {
@@ -184,6 +190,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         return false;
+    }
+
+    function isMobileDevice() {
+        return /Mobi|Android/i.test(navigator.userAgent);
+    }
+
+    function adjustForMobile() {
+        document.body.style.zoom = '0.75';
+    }
+
+    function showSwipeGuide() {
+        swipeGuide.classList.add('visible');
+        setTimeout(() => {
+            swipeGuide.classList.remove('visible');
+        }, 3000);
     }
 
     restartButton.addEventListener('click', initialize);
