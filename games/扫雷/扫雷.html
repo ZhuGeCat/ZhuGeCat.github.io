@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>优化版扫雷游戏</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #E2D5D5;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            flex-direction: column;
+        }
+        .game-container {
+            display: grid;
+            grid-template-columns: repeat(10, 30px);
+            gap: 5px;
+        }
+        .cell {
+            width: 30px;
+            height: 30px;
+            background-color: #B5C2C7;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+        .cell:hover {
+            transform: scale(1.05);
+        }
+        .cell.revealed {
+            background-color: #D5C3C6;
+            cursor: default;
+        }
+        .cell.bomb {
+            background-color: #E7D3D3;
+            cursor: default;
+        }
+        .cell.revealed.bomb {
+            background-color: #D8A7B1;
+        }
+        .cell.marked {
+            background-color: #B7D3DF;
+        }
+        .explosion {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #D8A7B1;
+            border-radius: 50%;
+            animation: explode 0.5s forwards;
+        }
+        @keyframes explode {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(15);
+                opacity: 0;
+            }
+        }
+        .powder {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background-color: #D8A7B1;
+            border-radius: 50%;
+            animation: powder 1s forwards;
+        }
+        @keyframes powder {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            animation: confetti 3s forwards;
+        }
+        @keyframes confetti {
+            0% {
+                transform: translateY(0) rotateZ(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotateZ(720deg);
+                opacity: 0;
+            }
+        }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        .shake {
+            animation: shake 0.5s;
+            animation-iteration-count: 1;
+        }
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin-left: 10px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #D5C3C6;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #B5C2C7;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: rgba(255, 255, 255, 0.9);
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 300px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <label>标记模式</label>
+        <label class="switch">
+            <input type="checkbox" id="markModeSwitch">
+            <span class="slider"></span>
+        </label>
+    </div>
+    <div class="game-container" id="gameContainer"></div>
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <p id="resultText"></p>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const gridSize = 10;
+            const bombCount = 10;
+            const gameContainer = document.getElementById("gameContainer");
+            const markModeSwitch = document.getElementById("markModeSwitch");
+            const resultModal = document.getElementById("resultModal");
+            const resultText = document.getElementById("resultText");
+            const closeModal = document.getElementById("closeModal");
+            let markMode = false;
+            let revealedCells = 0;
+
+            const grid = [];
+            const bombs = [];
+
+            markModeSwitch.addEventListener("change", () => {
+                markMode = markModeSwitch.checked;
+            });
+
+            closeModal.addEventListener("click", () => {
+                resultModal.style.display = "none";
+                document.location.reload();
+            });
+
+            function createGrid() {
+                for (let i = 0; i < gridSize; i++) {
+                    grid[i] = [];
+                    for (let j = 0; j < gridSize; j++) {
+                        const cell = document.createElement("div");
+                        cell.classList.add("cell");
+                        cell.dataset.row = i;
+                        cell.dataset.col = j;
+                        gameContainer.appendChild(cell);
+                        grid[i][j] = cell;
+
+                        cell.addEventListener("click", () => handleClick(cell));
+                    }
+                }
+            }
+
+            function placeBombs() {
+                let placedBombs = 0;
+                while (placedBombs < bombCount) {
+                    const row = Math.floor(Math.random() * gridSize);
+                    const col = Math.floor(Math.random() * gridSize);
+                    if (!bombs.includes(`${row},${col}`)) {
+                        bombs.push(`${row},${col}`);
+                        placedBombs++;
+                    }
+                }
+            }
+
+            function handleClick(cell) {
+                if (markMode) {
+                    cell.classList.toggle("marked");
+                } else {
+                    const row = parseInt(cell.dataset.row);
+                    const col = parseInt(cell.dataset.col);
+                    if (bombs.includes(`${row},${col}`)) {
+                        revealBombs();
+                        explode(cell);
+                        createPowderExplosion(cell);
+                        cell.classList.add("shake");
+                        setTimeout(() => showResult("失败!"), 500);
+                    } else {
+                        revealCell(cell);
+                        if (revealedCells === gridSize * gridSize - bombCount) {
+                            showResult("胜利!");
+                            createConfetti();
+                        }
+                    }
+                }
+            }
+
+            function revealCell(cell) {
+                if (!cell.classList.contains("revealed") && !cell.classList.contains("marked")) {
+                    cell.classList.add("revealed");
+                    revealedCells++;
+                    const row = parseInt(cell.dataset.row);
+                    const col = parseInt(cell.dataset.col);
+                    const bombCount = countBombs(row, col);
+                    if (bombCount > 0) {
+                        cell.textContent = bombCount;
+                    } else {
+                        revealAdjacentCells(row, col);
+                    }
+                }
+            }
+
+            function revealAdjacentCells(row, col) {
+                const directions = [
+                    [-1, -1], [-1, 0], [-1, 1],
+                    [0, -1],           [0, 1],
+                    [1, -1], [1, 0], [1, 1]
+                ];
+                directions.forEach(([dx, dy]) => {
+                    const newRow = row + dx;
+                    const newCol = col + dy;
+                    if (isValidCell(newRow, newCol)) {
+                        revealCell(grid[newRow][newCol]);
+                    }
+                });
+            }
+
+            function countBombs(row, col) {
+                const directions = [
+                    [-1, -1], [-1, 0], [-1, 1],
+                    [0, -1],           [0, 1],
+                    [1, -1], [1, 0], [1, 1]
+                ];
+                return directions.reduce((count, [dx, dy]) => {
+                    const newRow = row + dx;
+                    const newCol = col + dy;
+                    if (bombs.includes(`${newRow},${newCol}`)) {
+                        return count + 1;
+                    }
+                    return count;
+                }, 0);
+            }
+
+            function isValidCell(row, col) {
+                return row >= 0 && row < gridSize && col >= 0 && col < gridSize;
+            }
+
+            function revealBombs() {
+                bombs.forEach(bomb => {
+                    const [row, col] = bomb.split(",").map(Number);
+                    const cell = grid[row][col];
+                    cell.classList.add("bomb");
+                });
+            }
+
+            function explode(cell) {
+                const rect = cell.getBoundingClientRect();
+                const explosion = document.createElement("div");
+                explosion.classList.add("explosion");
+                explosion.style.left = `${rect.left + rect.width / 2}px`;
+                explosion.style.top = `${rect.top + rect.height / 2}px`;
+                document.body.appendChild(explosion);
+                explosion.addEventListener("animationend", () => {
+                    explosion.remove();
+                });
+            }
+
+            function createPowderExplosion(cell) {
+                const rect = cell.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+
+                for (let i = 0; i < 50; i++) {
+                    const powder = document.createElement("div");
+                    powder.classList.add("powder");
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = Math.random() * 100 + 50;
+                    const tx = Math.cos(angle) * distance;
+                    const ty = Math.sin(angle) * distance;
+
+                    powder.style.left = `${centerX}px`;
+                    powder.style.top = `${centerY}px`;
+                    powder.style.setProperty("--tx", `${tx}px`);
+                    powder.style.setProperty("--ty", `${ty}px`);
+
+                    document.body.appendChild(powder);
+                    powder.addEventListener("animationend", () => {
+                        powder.remove();
+                    });
+                }
+            }
+
+            function createConfetti() {
+                const colors = ['#B5C2C7', '#D5C3C6', '#E7D3D3', '#B7D3DF', '#D8A7B1'];
+                for (let i = 0; i < 100; i++) {
+                    const confetti = document.createElement("div");
+                    confetti.classList.add("confetti");
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.left = `${Math.random() * 100}vw`;
+                    confetti.style.animationDelay = `${Math.random() * 3}s`;
+
+                    document.body.appendChild(confetti);
+                    confetti.addEventListener("animationend", () => {
+                        confetti.remove();
+                    });
+                }
+            }
+
+            function showResult(result) {
+                resultText.textContent = result;
+                resultModal.style.display = "flex";
+            }
+
+            createGrid();
+            placeBombs();
+        });
+    </script>
+</body>
+</html>
