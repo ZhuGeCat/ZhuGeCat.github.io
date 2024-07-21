@@ -342,6 +342,7 @@
                         <option value="multi">双人</option>
                         <option value="monster">怪物模式</option>
                         <option value="auto">全自动</option>
+                        <option value="advancedAuto">高级全自动</option>
                         <option value="playerVsAI">玩家 vs 电脑</option>
                     </select>
                 </div>
@@ -357,6 +358,7 @@
         <p>怪物模式不能碰到黄色的方块</p>
         <p>全自动模式无法操作</p>
         <p>玩家 vs 电脑时，玩家控制绿蛇</p>
+        <p>高级全自动模式中，AI会优先吃最近的食物</p>
         <p>改变设置后，需要重新开始一局才能生效</p>
         <button id="closeRulesButton">关闭</button>
     </div>
@@ -429,10 +431,10 @@
         }
 
         function updateGame() {
-            if (gameMode === 'auto' || gameMode === 'playerVsAI') {
+            if (gameMode === 'auto' || gameMode === 'advancedAuto' || gameMode === 'playerVsAI') {
                 autoMoveSnake(snake2); // 电脑控制第二条蛇
             }
-            if (gameMode !== 'auto') {
+            if (gameMode !== 'auto' && gameMode !== 'advancedAuto') {
                 moveSnake(snake1, direction1); // 玩家控制第一条蛇
             }
 
@@ -445,7 +447,7 @@
                 return;
             }
 
-            if (gameMode !== 'auto' && checkFoodCollision(snake1)) {
+            if (gameMode !== 'auto' && gameMode !== 'advancedAuto' && checkFoodCollision(snake1)) {
                 snake1.push({ ...snake1[snake1.length - 1] });
                 if (food.length === 0) {
                     generateFood();
@@ -467,7 +469,13 @@
 
         function autoMoveSnake(snake) {
             const head = snake[0];
-            const target = food[0];
+
+            let target;
+            if (gameMode === 'advancedAuto') {
+                target = findClosestFood(head);
+            } else {
+                target = food[0];
+            }
 
             const direction = findDirection(head, target);
             if (direction) {
@@ -478,6 +486,21 @@
                 }
             }
             moveSnake(snake, snake === snake2 ? direction2 : direction1);
+        }
+
+        function findClosestFood(head) {
+            let closestFood = null;
+            let minDistance = Infinity;
+
+            food.forEach(item => {
+                const distance = Math.abs(head.x - item.x) + Math.abs(head.y - item.y);
+                if (distance < minDistance) {
+                    closestFood = item;
+                    minDistance = distance;
+                }
+            });
+
+            return closestFood;
         }
 
         function findDirection(start, end) {
@@ -766,7 +789,7 @@
 
         function drawGame() {
             gameBoard.innerHTML = '';
-            if (gameMode !== 'auto') {
+            if (gameMode !== 'auto' && gameMode !== 'advancedAuto') {
                 snake1.forEach((segment, index) => {
                     const snakeElement = document.createElement('div');
                     snakeElement.style.gridRowStart = segment.y + 1;
@@ -778,7 +801,7 @@
                     gameBoard.appendChild(snakeElement);
                 });
             }
-            if (gameMode === 'multi' || gameMode === 'playerVsAI' || gameMode === 'auto') {
+            if (gameMode === 'multi' || gameMode === 'playerVsAI' || gameMode === 'auto' || gameMode === 'advancedAuto') {
                 snake2.forEach((segment, index) => {
                     const snakeElement = document.createElement('div');
                     snakeElement.style.gridRowStart = segment.y + 1;
