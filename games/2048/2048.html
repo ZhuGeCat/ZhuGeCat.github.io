@@ -10,8 +10,9 @@
     <div class="container">
         <h1>2048</h1>
         <div class="score-container">
-            <div>Score: <span id="score">0</span></div>
+            <div>分数: <span id="score">0</span></div>
         </div>
+        <button id="ai-mode-button">AI模式</button>
         <button id="restart-button">再来一次</button>
         <div id="game-board">
             <!-- 16个格子 -->
@@ -32,14 +33,40 @@
             <div class="tile"></div>
             <div class="tile"></div>
             <div id="game-over" class="hidden">
-                <div>Game Over!</div>
+                <div>游戏失败!</div>
                 <button id="try-again-button">再来一次</button>
             </div>
         </div>
+        <div id="game-over" class="hidden">
+            <div>Game Over!</div>
+            <button id="try-again-button">再来一次</button>
+        </div>
         <div id="swipe-guide" class="hidden">
-            <p>移动端在屏幕上滑动来移动方块</p>
+            移动端在屏幕上滑动来移动方块
         </div>
     </div>
+
+    <div id="ai-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>AI模式设置</h2>
+            <div class="switch-container">
+                <span class="ai-label">AI模式:</span>
+                <br>
+                <label class="switch">
+                    <input type="checkbox" id="ai-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="slider-container">
+                <label for="ai-speed">AI速度(越大越慢):</label>
+                <input type="range" id="ai-speed" min="100" max="1000" value="300" step="100">
+                <span id="speed-value">300ms</span>
+            </div>
+            <div id="ai-move">AI当前操作: -</div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
