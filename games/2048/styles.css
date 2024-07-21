@@ -159,6 +159,7 @@ h1 {
 }
 
 #game-over button {
+    font-family: 'YourCustomFont';
     font-size: 24px;
     padding: 10px 20px;
     margin-top: 20px;
