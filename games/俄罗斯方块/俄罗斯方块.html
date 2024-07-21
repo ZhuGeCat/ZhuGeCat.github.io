@@ -247,6 +247,7 @@
         <div class="sidebar">
             <canvas id="nextPiece" width="150" height="150"></canvas>
             <div class="score">分数: <span id="score">0</span></div>
+            <div class="score">最高分: <span id="highScore">0</span></div>
             <div class="controls">
                 <button id="startBtn">开始</button>
                 <button id="pauseBtn">暂停</button>
@@ -274,9 +275,13 @@
     <div id="gameOverModal" class="game-over-modal">
         <h2>游戏结束!</h2>
         <div class="score">最终分数: <span id="finalScore">0</span></div>
-        <button id="restartBtn">再来一次</button>
+        <button id="restartBtn">超级加速！</button>
+        <br>
+        <span>刷新来再来一次！</span>
     </div>
     <script>
+        let highScore = localStorage.getItem('tetrisHighScore') || 0;
+        const highScoreElement = document.getElementById('highScore');
         const canvas = document.getElementById('tetris');
         const context = canvas.getContext('2d');
         const nextPieceCanvas = document.getElementById('nextPiece');
@@ -331,6 +336,8 @@
         const restartBtn = document.getElementById('restartBtn');
         const speedInput = document.getElementById('speed');
         const ghostPieceInput = document.getElementById('ghostPiece');
+
+        restartBtn.addEventListener('click', restartGame);
 
         function getRandomInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -409,7 +416,7 @@
             }
 
             if (clearedRows > 0) {
-                score += (clearedRows === 1 ? 10 : clearedRows * 20);
+                score += (clearedRows <= 2 ? clearedRows * 10 : clearedRows * 20);
                 scoreElement.textContent = score;
                 if (clearedRows >= 3) {
                     animateRowClear(clearedRows);
@@ -512,6 +519,12 @@
         function showGameOver() {
             cancelAnimationFrame(rAF);
             gameOver = true;
+            document.getElementById('finalScore').textContent = score;
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('tetrisHighScore', highScore);
+            }
+            highScoreElement.textContent = highScore;
             gameOverModal.style.display = 'block';
         }
 
@@ -607,17 +620,30 @@
             }
         });
 
-        startBtn.addEventListener('click', function() {
-            if (gameOver) {
-                playfield.forEach(row => row.fill(0));
-                score = 0;
-                scoreElement.textContent = '0';
-                gameOver = false;
-                gameOverModal.style.display = 'none';
-            }
+        function restartGame() {
+            playfield.forEach(row => row.fill(0));
+            score = 0;
+            scoreElement.textContent = '0';
+            gameOver = false;
+            gameOverModal.style.display = 'none';
+            tetromino = getNextTetromino();
+            nextTetromino = getNextTetromino();
+            drawNextPiece();
             rAF = requestAnimationFrame(loop);
             startBtn.disabled = true;
             pauseBtn.disabled = false;
+            speed = 5; // 重置速度为初始速度
+        }
+
+        // 在 startBtn 的事件监听器中调用 restartGame
+        startBtn.addEventListener('click', function() {
+            if (gameOver) {
+                restartGame();
+            } else {
+                rAF = requestAnimationFrame(loop);
+                startBtn.disabled = true;
+                pauseBtn.disabled = false;
+            }
         });
 
         pauseBtn.addEventListener('click', function() {
@@ -734,6 +760,8 @@
                 }
             }
         }
+
+        highScoreElement.textContent = highScore;
     </script>
 </body>
 </html>
