@@ -1,5 +1,17 @@
+/* Custom Font Section: You can add your custom fonts here */
+@font-face {
+    font-family: 'YourCustomFont';
+    src: url('../../fonts/优设好身体.TTF') format('truetype'); /* Ensure the correct path and format */
+}
+
+:root {
+    --custom-font-family: 'YourCustomFont', sans-serif; /* Use the custom font */
+}
+
+/* End of Custom Font Section */
+
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: var(--custom-font-family);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -28,6 +40,7 @@ h1 {
 }
 
 #restart-button {
+    font-family: 'YourCustomFont';
     font-size: 16px;
     padding: 10px 20px;
     margin-bottom: 20px;
