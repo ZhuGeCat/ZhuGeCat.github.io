@@ -27,7 +27,7 @@
             margin: 0;
             background: linear-gradient(135deg, #2c3e50, #34495e);
             color: #ecf0f1;
-            overflow: hidden;
+            overflow: auto; /* 确保允许滚动 */
         }
 
         h1 {
@@ -138,21 +138,6 @@
             width: 100%;
         }
 
-        #settings {
-            font-family: 'YSHAOSHENTI', sans-serif;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            background-color: rgba(28, 40, 51, 0.9);
-            padding: 20px;
-            border-radius: 15px;
-            border: 2px solid #ecf0f1;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-            margin-bottom: 20px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
         button {
             background-color: #2980b9;
             color: #ecf0f1;
@@ -255,6 +240,71 @@
         .shake {
             animation: shake 0.5s ease-in-out;
         }
+
+        /* 新增: 游戏玩法模态窗口 */
+        #game-rules {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.9);
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            font-size: 1.2rem;
+            z-index: 30;
+            text-align: center;
+        }
+
+        #game-rules p {
+            margin: 10px 0;
+        }
+
+        #game-rules button {
+            margin-top: 10px;
+        }
+
+        /* 添加模态窗口的样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 30;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: rgba(28, 40, 51, 0.9);
+            margin: 15% auto;
+            padding: 20px;
+            border: 2px solid #ecf0f1;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            text-align: center;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -262,9 +312,19 @@
         <h1>贪吃蛇游戏</h1>
         <div id="controls">
             <button id="settings-button" class="control-item">设置</button>
-            <div id="settings" class="control-item">
+            <button id="startButton" class="control-item">开始游戏</button>
+            <button id="rulesButton" class="control-item">玩法</button>
+        </div>
+        <div id="game-board"></div>
+        <div id="score">分数: 0</div>
+    </div>
+    <div id="game-over">游戏结束</div>
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeSettingsButton">&times;</span>
+            <div id="settings">
                 <div class="control-item">
-                    <label for="speed">速度 (毫秒): </label>
+                    <label for="speed">速度 (毫秒,每x毫秒移动一次，参数越大越慢): </label>
                     <input type="number" id="speed" value="100" min="50" max="500">
                 </div>
                 <div class="control-item">
@@ -286,23 +346,35 @@
                     </select>
                 </div>
             </div>
-            <button id="startButton" class="control-item">开始游戏</button>
         </div>
-        <div id="game-board"></div>
-        <div id="score">分数: 0</div>
     </div>
-    <div id="game-over">游戏结束</div>
+    <div id="game-rules">
+        <p>欢迎来到贪吃蛇游戏！</p>
+        <p>控制绿蛇，避免撞墙和撞到自己或其他障碍。</p>
+        <p>吃掉红色食物以增加分数和蛇的长度。</p>
+        <p>使用WASD或者上下左右操控，建议WASD，否则网页会滚动</p>
+        <p>双人模式时，绿色WASD，蓝蛇上下左右</p>
+        <p>怪物模式不能碰到黄色的方块</p>
+        <p>全自动模式无法操作</p>
+        <p>玩家 vs 电脑时，玩家控制绿蛇</p>
+        <p>改变设置后，需要重新开始一局才能生效</p>
+        <button id="closeRulesButton">关闭</button>
+    </div>
     <script>
         const gameBoard = document.getElementById('game-board');
         const scoreDisplay = document.getElementById('score');
         const gameOverDisplay = document.getElementById('game-over');
         const startButton = document.getElementById('startButton');
         const settingsButton = document.getElementById('settings-button');
-        const settingsDiv = document.getElementById('settings');
+        const rulesButton = document.getElementById('rulesButton');
+        const closeRulesButton = document.getElementById('closeRulesButton');
+        const closeSettingsButton = document.getElementById('closeSettingsButton'); // 获取关闭设置按钮
+        const settingsModal = document.getElementById('settings-modal'); // 获取设置模态窗口
         const speedInput = document.getElementById('speed');
         const foodCountInput = document.getElementById('foodCount');
         const wallCollisionInput = document.getElementById('wallCollision');
         const gameModeInput = document.getElementById('gameMode');
+        const gameRulesModal = document.getElementById('game-rules');
         const boardSize = 20;
         const initialSnake1 = [{ x: 10, y: 10 }];
         const initialSnake2 = [{ x: 15, y: 15 }];
@@ -323,14 +395,25 @@
 
         document.addEventListener('keydown', changeDirection);
         startButton.addEventListener('click', startGame);
-        settingsButton.addEventListener('click', toggleSettings);
+        settingsButton.addEventListener('click', showSettings);
+        rulesButton.addEventListener('click', showRules);
+        closeRulesButton.addEventListener('click', hideRules);
+        closeSettingsButton.addEventListener('click', hideSettings); // 绑定关闭设置按钮事件
 
-        function toggleSettings() {
-            if (settingsDiv.style.display === 'none') {
-                settingsDiv.style.display = 'flex';
-            } else {
-                settingsDiv.style.display = 'none';
-            }
+        function showRules() {
+            gameRulesModal.style.display = 'block';
+        }
+
+        function hideRules() {
+            gameRulesModal.style.display = 'none';
+        }
+
+        function showSettings() {
+            settingsModal.style.display = 'block';
+        }
+
+        function hideSettings() {
+            settingsModal.style.display = 'none';
         }
 
         function startGame() {
